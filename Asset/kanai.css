@@ -1,9 +1,124 @@
-.kanai-history { margin-bottom: 15px; }
-.kanai-msg { padding: 8px 10px; margin-bottom: 6px; border-radius: 4px; }
-.kanai-msg-user { background: #f0f4ff; }
-.kanai-msg-assistant { background: #f6f6f6; }
-.kanai-proposals { border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 15px; }
-.kanai-ask textarea { width: 100%; }
-.kanai-busy { opacity: .6; }
-.kanai-skills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.kanai-skill-form { display: inline; margin: 0; }
+/* ── KanAI assistant UI ──────────────────────────────────────────────── */
+.kanai {
+    --kanai-accent: #4263eb;
+    --kanai-accent-soft: rgba(66, 99, 235, 0.08);
+    --kanai-border: rgba(0, 0, 0, 0.12);
+    --kanai-muted: #6b7280;
+    max-width: 860px;
+}
+.kanai .page-header h2 { display: flex; align-items: center; gap: 8px; }
+.kanai-intro { color: var(--kanai-muted); font-size: 13px; margin: -6px 0 18px; }
+
+/* Quick actions / skills */
+.kanai-skills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.kanai-skill-form { display: inline; margin: 0; padding: 0; }
+.kanai-skill {
+    cursor: pointer;
+    border: 1px solid var(--kanai-border);
+    background: #fff;
+    color: #1f2937;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 13px;
+    line-height: 1.3;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: border-color .12s ease, color .12s ease, transform .12s ease, box-shadow .12s ease;
+}
+.kanai-skill:hover {
+    border-color: var(--kanai-accent);
+    color: var(--kanai-accent);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 7px rgba(66, 99, 235, 0.16);
+}
+.kanai-skill:disabled { opacity: .5; cursor: default; transform: none; box-shadow: none; }
+
+/* Conversation thread */
+.kanai-thread { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+.kanai-msg { display: flex; gap: 10px; align-items: flex-start; }
+.kanai-msg-avatar {
+    flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; background: rgba(0, 0, 0, 0.05);
+}
+.kanai-msg-assistant .kanai-msg-avatar { background: var(--kanai-accent-soft); }
+.kanai-msg-body { flex: 1 1 auto; min-width: 0; }
+.kanai-msg-role {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .04em;
+    color: #9ca3af; font-weight: 600; margin-bottom: 4px;
+}
+.kanai-msg-text {
+    background: #f7f8fa; border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 10px; padding: 10px 13px; font-size: 13.5px; line-height: 1.55;
+    color: #1f2937; overflow-wrap: anywhere;
+}
+.kanai-msg-user .kanai-msg-text {
+    background: var(--kanai-accent-soft); border-color: rgba(66, 99, 235, 0.18);
+}
+
+/* Empty state */
+.kanai-empty { text-align: center; padding: 30px 16px; color: #9ca3af; }
+.kanai-empty-icon { font-size: 32px; margin-bottom: 8px; }
+.kanai-empty p { margin: 0; font-size: 13.5px; }
+
+/* Proposals card */
+.kanai-proposals {
+    border: 1px solid var(--kanai-border); border-radius: 12px;
+    margin-bottom: 20px; overflow: hidden; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.kanai-proposals-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; background: var(--kanai-accent-soft);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08); font-weight: 600; color: #1f2937;
+}
+.kanai-proposals-count {
+    background: var(--kanai-accent); color: #fff; font-size: 11px;
+    border-radius: 999px; padding: 1px 8px; font-weight: 600;
+}
+.kanai-proposals ul { list-style: none; margin: 0; padding: 4px 0; }
+.kanai-proposals li { margin: 0; }
+.kanai-proposal {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 9px 14px; cursor: pointer; transition: background .1s ease;
+}
+.kanai-proposal:hover { background: rgba(0, 0, 0, 0.025); }
+.kanai-proposal input[type=checkbox] { margin: 3px 0 0; flex: 0 0 auto; }
+.kanai-proposal-main { flex: 1 1 auto; min-width: 0; }
+.kanai-action { font-size: 13px; font-weight: 600; color: #374151; }
+.kanai-action-icon { margin-right: 5px; }
+.kanai-tasklink {
+    color: var(--kanai-accent); text-decoration: none; font-weight: 600; margin-left: 5px;
+}
+.kanai-tasklink:hover { text-decoration: underline; }
+.kanai-reason { display: block; color: var(--kanai-muted); font-size: 12.5px; margin-top: 2px; }
+.kanai-proposals-foot {
+    display: flex; gap: 8px; padding: 11px 14px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08); background: rgba(0, 0, 0, 0.015);
+}
+
+/* Composer */
+.kanai-ask { margin-top: 4px; }
+.kanai-ask textarea {
+    width: 100%; box-sizing: border-box;
+    border: 1px solid rgba(0, 0, 0, 0.16); border-radius: 10px;
+    padding: 10px 13px; font-size: 13.5px; line-height: 1.5; resize: vertical;
+    transition: border-color .12s ease, box-shadow .12s ease;
+}
+.kanai-ask textarea:focus {
+    outline: none; border-color: var(--kanai-accent);
+    box-shadow: 0 0 0 3px rgba(66, 99, 235, 0.15);
+}
+.kanai-ask-actions { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+
+/* Thinking indicator (local models can take a while) */
+.kanai-thinking {
+    display: flex; align-items: center; gap: 10px; margin: 16px 0;
+    padding: 12px 14px; border-radius: 10px; font-size: 13px; color: #374151;
+    background: var(--kanai-accent-soft); border: 1px solid rgba(66, 99, 235, 0.2);
+}
+.kanai-spinner {
+    flex: 0 0 auto; width: 15px; height: 15px; border-radius: 50%;
+    border: 2px solid rgba(66, 99, 235, 0.3); border-top-color: var(--kanai-accent);
+    animation: kanai-spin .7s linear infinite;
+}
+@keyframes kanai-spin { to { transform: rotate(360deg); } }
+.kanai-busy { opacity: .7; }
