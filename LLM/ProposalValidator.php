@@ -13,14 +13,15 @@ class ProposalValidator
 {
     /** Actions a standard project user can perform. */
     public const ACTIONS = [
-        'create_task', 'close_task', 'reopen_task', 'move_task',
+        'create_task', 'update_task', 'close_task', 'reopen_task', 'move_task',
         'assign_task', 'add_tag', 'set_due_date', 'add_comment',
+        'add_subtask', 'link_tasks',
     ];
 
     /** Actions that operate on an existing task and therefore require task_id. */
     private const REQUIRE_TASK_ID = [
-        'close_task', 'reopen_task', 'move_task', 'assign_task',
-        'add_tag', 'set_due_date', 'add_comment',
+        'update_task', 'close_task', 'reopen_task', 'move_task', 'assign_task',
+        'add_tag', 'set_due_date', 'add_comment', 'add_subtask', 'link_tasks',
     ];
 
     public static function parse(string $raw): array

@@ -43,4 +43,19 @@ final class ProposalValidatorTest extends TestCase
         $this->assertSame('close_task', $clean[0]['action']);
         $this->assertSame('create_task', $clean[1]['action']);
     }
+
+    public function testValidateKeepsNewStructuringActions(): void
+    {
+        $proposals = [
+            ['action' => 'update_task', 'task_id' => 3, 'params' => ['description' => 'clearer']],
+            ['action' => 'add_subtask', 'task_id' => 3, 'params' => ['title' => 'step 1']],
+            ['action' => 'link_tasks', 'task_id' => 3, 'params' => ['opposite_task_id' => 4]],
+            ['action' => 'update_task'], // missing task_id -> dropped
+        ];
+        $clean = ProposalValidator::validateProposals($proposals);
+        $this->assertCount(3, $clean);
+        $this->assertSame('update_task', $clean[0]['action']);
+        $this->assertSame('add_subtask', $clean[1]['action']);
+        $this->assertSame('link_tasks', $clean[2]['action']);
+    }
 }
