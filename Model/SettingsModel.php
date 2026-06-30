@@ -61,12 +61,14 @@ class SettingsModel extends Base
             'kanai_max_output_tokens' => (string) max(128, (int) ($values['kanai_max_output_tokens'] ?? 1024)),
             'kanai_history_retention_days' => (string) max(0, (int) ($values['kanai_history_retention_days'] ?? 0)),
         ];
-        // Only overwrite a key when the admin actually typed a new one (non-empty,
-        // not the masked placeholder).
-        foreach (['kanai_openai_key' => 'kanai_openai_key', 'kanai_anthropic_key' => 'kanai_anthropic_key'] as $field => $option) {
-            $new = $values[$field] ?? '';
-            if ($new !== '' && strpos($new, '••••') !== 0) {
-                $save[$option] = $crypto->encrypt($new);
+        // The admin form leaves a key field EMPTY to keep the stored key (the
+        // saved key is shown only as a masked hint, never pre-filled into the
+        // input). So any non-empty submitted value is a genuine new key. This
+        // avoids depending on a fragile multibyte mask sentinel.
+        foreach (['kanai_openai_key', 'kanai_anthropic_key'] as $field) {
+            $new = trim($values[$field] ?? '');
+            if ($new !== '') {
+                $save[$field] = $crypto->encrypt($new);
             }
         }
         $this->configModel->save($save);
