@@ -39,7 +39,7 @@ class Plugin extends Base
             'Plugin\KanAI\Model' => [
                 'SettingsModel', 'ConversationModel', 'AssistantService', 'ActionApplierModel',
             ],
-            'Plugin\KanAI\LLM' => ['LLMClientFactory'],
+            'Plugin\KanAI\LLM' => ['LlmClientFactory'],
         ];
     }
 

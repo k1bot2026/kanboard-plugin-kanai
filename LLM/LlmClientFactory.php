@@ -5,7 +5,7 @@ namespace Kanboard\Plugin\KanAI\LLM;
 use Kanboard\Core\Base;
 use Kanboard\Plugin\KanAI\Settings\GatingPolicy;
 
-class LLMClientFactory extends Base
+class LlmClientFactory extends Base
 {
     public function forProject(int $projectId, string $requestedProvider = ''): LLMClientInterface
     {
