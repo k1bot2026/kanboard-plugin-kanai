@@ -72,7 +72,16 @@ class ContextBuilderModel
      */
     public function build(int $projectId, string $question, int $tokenBudget): array
     {
+        if ($this->projectModel === null || $this->taskFinderModel === null
+            || $this->commentModel === null || $this->subtaskModel === null) {
+            throw new \RuntimeException('ContextBuilderModel::build() requires all finder models to be injected.');
+        }
+
         $project = $this->projectModel->getById($projectId);
+        if (! is_array($project)) {
+            throw new \RuntimeException('KanAI: project not found: ' . $projectId);
+        }
+
         $tasks = $this->taskFinderModel->getAll($projectId);
 
         $keywords = array_filter(preg_split('/\s+/', strtolower($question)));
@@ -89,28 +98,29 @@ class ContextBuilderModel
 
         $rows = [];
         foreach ($tasks as $task) {
+            $taskId = (int) ($task['id'] ?? 0);
             $line = sprintf(
                 '#%d [%s] %s%s',
-                $task['id'],
+                $taskId,
                 empty($task['is_active']) ? 'closed' : 'open',
-                $task['title'],
+                ($task['title'] ?? ''),
                 empty($task['description']) ? '' : ' — ' . $task['description']
             );
             $rows[] = [
                 'text' => $line,
-                'rank' => $score($task['title'] . ' ' . ($task['description'] ?? '')),
+                'rank' => $score(($task['title'] ?? '') . ' ' . ($task['description'] ?? '')),
                 'recency' => (int) ($task['date_modification'] ?? 0),
             ];
-            foreach ($this->commentModel->getAll($task['id']) as $c) {
+            foreach ($this->commentModel->getAll($taskId) as $c) {
                 $rows[] = [
-                    'text' => sprintf('  comment on #%d: %s', $task['id'], $c['comment']),
+                    'text' => sprintf('  comment on #%d: %s', $taskId, $c['comment']),
                     'rank' => $score($c['comment']),
                     'recency' => (int) ($c['date_creation'] ?? 0),
                 ];
             }
-            foreach ($this->subtaskModel->getAll($task['id']) as $s) {
+            foreach ($this->subtaskModel->getAll($taskId) as $s) {
                 $rows[] = [
-                    'text' => sprintf('  subtask of #%d: %s', $task['id'], $s['title']),
+                    'text' => sprintf('  subtask of #%d: %s', $taskId, $s['title']),
                     'rank' => $score($s['title']),
                     'recency' => 0,
                 ];
