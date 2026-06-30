@@ -16,7 +16,12 @@ external AI off with a single, server-enforced kill switch.
 
 ## Status
 
-`0.1.0` — scaffold. Feature implementation tracked in `docs/superpowers/`.
+`1.0.0` — Ask/RAG + approval-gated assistant. Local LLM default; external providers admin-gated.
+
+## Configure
+
+- **Global:** Settings → KanAI (admin only) — set LLM endpoint/key, enable/disable external providers.
+- **Per-project:** open a project → **KanAI Settings** in the sidebar (project managers only) — enable KanAI for that project and opt in to external AI providers.
 
 ## Install
 

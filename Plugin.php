@@ -24,6 +24,10 @@ class Plugin extends Base
         $this->projectAccessMap->add('AssistantController', '*', Role::PROJECT_MEMBER);
         $this->projectAccessMap->add('ActionController', '*', Role::PROJECT_MEMBER);
 
+        $this->route->addRoute('/kanai/project/:project_id/settings', 'ProjectSettingsController', 'show', 'KanAI');
+        $this->route->addRoute('/kanai/project/:project_id/settings/save', 'ProjectSettingsController', 'save', 'KanAI');
+        $this->projectAccessMap->add('ProjectSettingsController', '*', Role::PROJECT_MANAGER);
+
         $this->template->hook->attach('template:project:sidebar', 'KanAI:project/sidebar');
         $this->hook->on('template:layout:js', ['template' => 'plugins/KanAI/Asset/kanai.js']);
         $this->hook->on('template:layout:css', ['template' => 'plugins/KanAI/Asset/kanai.css']);
