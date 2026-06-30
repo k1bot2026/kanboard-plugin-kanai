@@ -1,0 +1,22 @@
+{
+    "name": "k1bot2026/kanboard-plugin-kanai",
+    "description": "AI assistant & project Q&A (RAG) for Kanboard",
+    "type": "kanboard-plugin",
+    "license": "MIT",
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Kanboard\\Plugin\\KanAI\\": ""
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Kanboard\\Plugin\\KanAI\\Tests\\": "tests/"
+        }
+    }
+}
