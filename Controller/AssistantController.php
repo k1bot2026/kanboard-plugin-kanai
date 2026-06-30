@@ -40,10 +40,19 @@ class AssistantController extends BaseController
         if ($question === '') {
             $this->flash->failure(t('Please enter a question.'));
         } else {
+            // Release the PHP session lock before the (possibly slow) LLM call so the
+            // rest of Kanboard stays responsive while KanAI is thinking — otherwise
+            // every other request from this user blocks until the model answers.
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
             try {
                 $this->assistantService->ask((int) $project['id'], (int) $userId, $question, $provider);
             } catch (\Throwable $e) {
-                $this->flash->failure(t('KanAI error: %s', $e->getMessage()));
+                // The session is closed now, so surface the error in the thread (DB)
+                // rather than via a flash message that would not persist.
+                $this->conversationModel->addMessage((int) $project['id'], (int) $userId, 'user', $question);
+                $this->conversationModel->addMessage((int) $project['id'], (int) $userId, 'assistant', 'KanAI error: ' . $e->getMessage());
             }
         }
         $this->response->redirect($this->helper->url->to('AssistantController', 'index', ['project_id' => $project['id'], 'plugin' => 'KanAI']));
