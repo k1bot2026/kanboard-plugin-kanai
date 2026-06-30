@@ -20,7 +20,7 @@ class ConfigController extends BaseController
 
     public function save(): void
     {
-        $this->checkCSRFParam();
+        // getValues() auto-validates the POST CSRF token (returns [] if invalid).
         $values = $this->request->getValues();
         $this->settingsModel->saveGlobal($values);
         $this->flash->success(t('Settings saved.'));

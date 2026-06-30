@@ -9,10 +9,11 @@ class ActionController extends BaseController
     public function apply(): void
     {
         $project = $this->getProject();
-        $this->checkCSRFParam();
         $userId = (int) $this->userSession->getId();
-        $setId = (int) $this->request->getIntegerParam('proposal_set_id');
-        $approvedIndexes = array_map('intval', (array) $this->request->getValue('approve'));
+        // getValues() auto-validates the POST CSRF token (returns [] if invalid).
+        $values = $this->request->getValues();
+        $setId = (int) (isset($values['proposal_set_id']) ? $values['proposal_set_id'] : 0);
+        $approvedIndexes = array_map('intval', (array) (isset($values['approve']) ? $values['approve'] : []));
 
         $set = $this->conversationModel->getProposalSet($setId);
         if ($set && (int) $set['project_id'] === (int) $project['id']) {

@@ -22,12 +22,14 @@ class AssistantController extends BaseController
     public function ask(): void
     {
         $project = $this->getProject();
-        $this->checkCSRFParam();
         $userId = $this->userSession->getId();
-        $question = trim($this->request->getStringParam('question'));
-        $provider = $this->request->getStringParam('provider');
+        // getValues() returns the POST data and auto-validates the CSRF token
+        // (returns [] on an invalid/absent token), so no separate checkCSRFParam.
+        $values = $this->request->getValues();
+        $question = isset($values['question']) ? trim($values['question']) : '';
+        $provider = isset($values['provider']) ? $values['provider'] : '';
 
-        $skill = $this->request->getStringParam('skill');
+        $skill = isset($values['skill']) ? $values['skill'] : '';
         if ($skill !== '') {
             $instruction = \Kanboard\Plugin\KanAI\Model\AssistantSkills::instructionFor($skill);
             if ($instruction !== null) {

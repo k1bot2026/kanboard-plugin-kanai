@@ -21,7 +21,7 @@ class ProjectSettingsController extends BaseController
     public function save(): void
     {
         $project = $this->getProject();
-        $this->checkCSRFParam();
+        // getValues() auto-validates the POST CSRF token (returns [] if invalid).
         $values = $this->request->getValues();
         $this->settingsModel->saveProject(
             (int) $project['id'],
