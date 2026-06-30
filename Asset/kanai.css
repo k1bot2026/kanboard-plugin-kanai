@@ -110,3 +110,41 @@
 }
 @keyframes kanai-spin { to { transform: rotate(360deg); } }
 .kanai-busy { opacity: .7; }
+
+/* ── Conversation layout (chat list + main) ──────────────────────────── */
+.kanai-layout { display: flex; gap: 18px; align-items: flex-start; }
+.kanai-convlist { flex: 0 0 210px; width: 210px; }
+.kanai-main { flex: 1 1 auto; min-width: 0; }
+.kanai-newchat {
+    display: block; text-align: center; text-decoration: none;
+    border: 1px solid var(--kanai-border); border-radius: 10px;
+    padding: 8px 10px; font-size: 13px; color: inherit;
+}
+.kanai-newchat:hover { border-color: var(--kanai-accent); color: var(--kanai-accent); background: var(--kanai-surface); }
+.kanai-convlist ul { list-style: none; margin: 10px 0 0; padding: 0; }
+.kanai-conv {
+    display: flex; align-items: center; border-radius: 8px; margin-bottom: 2px;
+}
+.kanai-conv:hover { background: var(--kanai-surface); }
+.kanai-conv.is-active { background: var(--kanai-user-tint); }
+.kanai-conv-link {
+    flex: 1 1 auto; min-width: 0; text-decoration: none; color: inherit;
+    padding: 7px 10px; font-size: 13px; white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis;
+}
+.kanai-conv.is-active .kanai-conv-link { font-weight: 600; }
+.kanai-conv-del {
+    flex: 0 0 auto; text-decoration: none; color: var(--kanai-muted);
+    padding: 4px 9px; font-size: 15px; line-height: 1; opacity: 0;
+}
+.kanai-conv:hover .kanai-conv-del { opacity: 1; }
+.kanai-conv-del:hover { color: #d14836; }
+.kanai-conv-empty { color: var(--kanai-muted); font-size: 12.5px; padding: 7px 10px; }
+.kanai-msg-avatar img { width: 28px; height: 28px; border-radius: 50%; display: block; }
+
+@media (max-width: 768px) {
+    .kanai-layout { flex-direction: column; }
+    .kanai-convlist { flex: 1 1 auto; width: 100%; }
+    .kanai-convlist ul { display: flex; flex-wrap: wrap; gap: 4px; }
+    .kanai-conv { width: auto; }
+}

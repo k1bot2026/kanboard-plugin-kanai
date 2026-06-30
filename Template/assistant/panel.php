@@ -7,51 +7,88 @@
     </div>
 <?php else: ?>
 
-    <p class="kanai-intro">
-        <?= t('Chat about this project, or pick a quick action. KanAI only proposes changes — you approve before anything is applied.') ?>
-    </p>
+<div class="kanai-layout">
 
-    <div class="kanai-thread" id="kanai-thread">
-        <?php if (empty($messages)): ?>
-            <div class="kanai-welcome">
-                <div class="kanai-welcome-icon">✨</div>
-                <p><?= t('Ask anything about this project, or tap a quick action below to get started.') ?></p>
-            </div>
-        <?php else: ?>
-            <?php foreach ($messages as $m): ?>
-                <div class="kanai-msg kanai-msg-<?= $this->text->e($m['role']) ?>">
-                    <div class="kanai-msg-avatar"><?= $m['role'] === 'user' ? '🧑' : '✨' ?></div>
-                    <div class="kanai-msg-body">
-                        <div class="kanai-msg-role"><?= $m['role'] === 'user' ? t('You') : 'KanAI' ?></div>
-                        <div class="kanai-msg-text"><?= nl2br($this->text->e($m['content'])) ?></div>
-                    </div>
-                </div>
+    <aside class="kanai-convlist">
+        <?= $this->url->link('<i class="fa fa-plus"></i> '.t('New chat'), 'AssistantController', 'index', ['project_id' => $project['id'], 'plugin' => 'KanAI', 'new' => 1], false, 'kanai-newchat') ?>
+        <ul>
+            <?php foreach ($conversations as $c): ?>
+                <li class="kanai-conv <?= (int) $c['id'] === (int) $active_id ? 'is-active' : '' ?>">
+                    <?= $this->url->link($this->text->e($c['title'] !== '' ? $c['title'] : t('New conversation')), 'AssistantController', 'index', ['project_id' => $project['id'], 'plugin' => 'KanAI', 'conversation_id' => $c['id']], false, 'kanai-conv-link') ?>
+                    <?= $this->url->link('&times;', 'AssistantController', 'deleteConversation', ['project_id' => $project['id'], 'plugin' => 'KanAI', 'conversation_id' => $c['id']], true, 'kanai-conv-del', t('Delete this conversation?')) ?>
+                </li>
             <?php endforeach ?>
-        <?php endif ?>
-    </div>
+            <?php if (empty($conversations)): ?>
+                <li class="kanai-conv-empty"><?= t('No conversations yet') ?></li>
+            <?php endif ?>
+        </ul>
+    </aside>
 
-    <?= $this->render('KanAI:assistant/proposals', ['project' => $project, 'proposals' => $proposals]) ?>
-
-    <div class="kanai-skills">
-        <?php foreach (\Kanboard\Plugin\KanAI\Model\AssistantSkills::all() as $skill): ?>
-            <form method="post" class="kanai-skill-form"
-                  action="<?= $this->url->href('AssistantController', 'ask', ['project_id' => $project['id'], 'plugin' => 'KanAI']) ?>">
-                <?= $this->form->csrf() ?>
-                <input type="hidden" name="skill" value="<?= $this->text->e($skill['key']) ?>">
-                <button type="submit" class="kanai-skill"><?= $this->text->e($skill['label']) ?></button>
-            </form>
-        <?php endforeach ?>
-    </div>
-
-    <form method="post" class="kanai-ask"
-          action="<?= $this->url->href('AssistantController', 'ask', ['project_id' => $project['id'], 'plugin' => 'KanAI']) ?>">
-        <?= $this->form->csrf() ?>
-        <?= $this->form->textarea('question', [], [], ['placeholder' => t('Message KanAI…'), 'rows' => 3, 'id' => 'kanai-input']) ?>
-        <div class="kanai-ask-actions">
-            <button type="submit" class="btn btn-blue"><?= t('Send') ?></button>
-            <?= $this->url->link(t('Clear conversation'), 'AssistantController', 'clear', ['project_id' => $project['id'], 'plugin' => 'KanAI'], true, '', t('Delete this project\'s KanAI history?')) ?>
-            <span class="kanai-hint"><?= t('Enter to send · Shift+Enter for a new line') ?></span>
+    <section class="kanai-main">
+        <div class="kanai-thread" id="kanai-thread">
+            <?php if (empty($messages)): ?>
+                <div class="kanai-welcome">
+                    <div class="kanai-welcome-icon">✨</div>
+                    <p><?= t('Ask anything about this project, or pick a quick action below. Conversations are shared with everyone on the project.') ?></p>
+                </div>
+            <?php else: ?>
+                <?php foreach ($messages as $m): ?>
+                    <div class="kanai-msg kanai-msg-<?= $this->text->e($m['role']) ?>">
+                        <div class="kanai-msg-avatar">
+                            <?php if ($m['role'] === 'assistant'): ?>
+                                <span class="kanai-ai">✨</span>
+                            <?php elseif (! empty($m['author'])): ?>
+                                <?= $this->avatar->render($m['author']['id'], $m['author']['username'], $m['author']['name'], $m['author']['email'], $m['author']['avatar_path'], '', 28) ?>
+                            <?php else: ?>
+                                <span class="kanai-ai">🧑</span>
+                            <?php endif ?>
+                        </div>
+                        <div class="kanai-msg-body">
+                            <div class="kanai-msg-role">
+                                <?php if ($m['role'] === 'assistant'): ?>
+                                    KanAI
+                                <?php elseif (! empty($m['author'])): ?>
+                                    <?= $this->text->e(! empty($m['author']['name']) ? $m['author']['name'] : $m['author']['username']) ?>
+                                <?php else: ?>
+                                    <?= t('You') ?>
+                                <?php endif ?>
+                            </div>
+                            <div class="kanai-msg-text"><?= nl2br($this->text->e($m['content'])) ?></div>
+                        </div>
+                    </div>
+                <?php endforeach ?>
+            <?php endif ?>
         </div>
-    </form>
+
+        <?= $this->render('KanAI:assistant/proposals', ['project' => $project, 'proposals' => $proposals]) ?>
+
+        <div class="kanai-skills">
+            <?php foreach (\Kanboard\Plugin\KanAI\Model\AssistantSkills::all() as $skill): ?>
+                <form method="post" class="kanai-skill-form"
+                      action="<?= $this->url->href('AssistantController', 'ask', ['project_id' => $project['id'], 'plugin' => 'KanAI']) ?>">
+                    <?= $this->form->csrf() ?>
+                    <input type="hidden" name="skill" value="<?= $this->text->e($skill['key']) ?>">
+                    <input type="hidden" name="conversation_id" value="<?= (int) $active_id ?>">
+                    <button type="submit" class="kanai-skill"><?= $this->text->e($skill['label']) ?></button>
+                </form>
+            <?php endforeach ?>
+        </div>
+
+        <form method="post" class="kanai-ask"
+              action="<?= $this->url->href('AssistantController', 'ask', ['project_id' => $project['id'], 'plugin' => 'KanAI']) ?>">
+            <?= $this->form->csrf() ?>
+            <input type="hidden" name="conversation_id" value="<?= (int) $active_id ?>">
+            <?= $this->form->textarea('question', [], [], ['placeholder' => t('Message KanAI…'), 'rows' => 3, 'id' => 'kanai-input']) ?>
+            <div class="kanai-ask-actions">
+                <button type="submit" class="btn btn-blue"><?= t('Send') ?></button>
+                <?php if ($active_id > 0): ?>
+                    <?= $this->url->link(t('Delete chat'), 'AssistantController', 'deleteConversation', ['project_id' => $project['id'], 'plugin' => 'KanAI', 'conversation_id' => $active_id], true, '', t('Delete this conversation?')) ?>
+                <?php endif ?>
+                <span class="kanai-hint"><?= t('Enter to send · Shift+Enter for a new line') ?></span>
+            </div>
+        </form>
+    </section>
+
+</div>
 <?php endif ?>
 </div>

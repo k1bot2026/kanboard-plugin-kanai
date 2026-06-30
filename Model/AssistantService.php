@@ -8,7 +8,7 @@ use RuntimeException;
 
 class AssistantService extends Base
 {
-    public function ask(int $projectId, int $userId, string $question, string $provider = ''): array
+    public function ask(int $projectId, int $userId, int $conversationId, string $question, string $provider = ''): array
     {
         $settings = $this->settingsModel->getGlobal();
         $budget = (int) $settings['kanai_max_context_tokens'];
@@ -23,9 +23,10 @@ class AssistantService extends Base
         $ctx = $contextBuilder->build($projectId, $question, $budget);
         $client = $this->llmClientFactory->forProject($projectId, $provider);
 
-        // Recent history (excluding the not-yet-saved current question) for multi-turn.
+        // Recent history of THIS conversation (last 10 turns) for multi-turn context.
         $messages = [];
-        foreach ($this->conversationModel->getMessages($projectId, $userId, 10) as $m) {
+        $history = $this->conversationModel->getMessages($conversationId, 100);
+        foreach (array_slice($history, -10) as $m) {
             $messages[] = ['role' => $m['role'], 'content' => $m['content']];
         }
         $messages[] = ['role' => 'user', 'content' => $ctx['context'] . "\n\nQUESTION: " . $question];
@@ -43,12 +44,12 @@ class AssistantService extends Base
             $parsed = ProposalValidator::parse($repair);
         }
 
-        $this->conversationModel->addMessage($projectId, $userId, 'user', $question);
-        $assistantMsgId = $this->conversationModel->addMessage($projectId, $userId, 'assistant', $parsed['answer']);
+        $this->conversationModel->addMessage($conversationId, $projectId, $userId, 'user', $question);
+        $assistantMsgId = $this->conversationModel->addMessage($conversationId, $projectId, $userId, 'assistant', $parsed['answer']);
 
         $proposalSetId = null;
         if (! empty($parsed['proposals'])) {
-            $proposalSetId = $this->conversationModel->addProposalSet($projectId, $userId, $assistantMsgId, $parsed['proposals']);
+            $proposalSetId = $this->conversationModel->addProposalSet($conversationId, $projectId, $userId, $assistantMsgId, $parsed['proposals']);
         }
 
         $this->conversationModel->purgeOlderThan((int) $settings['kanai_history_retention_days'], time());
