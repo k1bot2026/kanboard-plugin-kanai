@@ -16,6 +16,7 @@ class SettingsModel extends Base
         'kanai_anthropic_model' => 'claude-sonnet-4-6',
         'kanai_max_context_tokens' => '8000',
         'kanai_max_output_tokens' => '1024',
+        'kanai_request_timeout' => '120',
         'kanai_history_retention_days' => '0',
     ];
 

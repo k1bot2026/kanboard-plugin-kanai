@@ -37,6 +37,8 @@
         <?= $this->form->number('kanai_max_context_tokens', $values) ?>
         <?= $this->form->label(t('Max output tokens'), 'kanai_max_output_tokens') ?>
         <?= $this->form->number('kanai_max_output_tokens', $values) ?>
+        <?= $this->form->label(t('Request timeout (seconds)'), 'kanai_request_timeout') ?>
+        <?= $this->form->number('kanai_request_timeout', $values) ?>
         <?= $this->form->label(t('History retention (days, 0 = forever)'), 'kanai_history_retention_days') ?>
         <?= $this->form->number('kanai_history_retention_days', $values) ?>
     </fieldset>

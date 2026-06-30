@@ -22,7 +22,8 @@ class LLMClientFactory extends Base
         );
 
         $maxOutput = (int) $settings['kanai_max_output_tokens'];
-        $http = $this->transport();
+        $timeout = (int) ($settings['kanai_request_timeout'] ?? 120);
+        $http = $this->transport($timeout);
 
         switch ($provider) {
             case 'anthropic':
@@ -36,12 +37,26 @@ class LLMClientFactory extends Base
     }
 
     /** @return callable fn(string $url, array $body, array $headers): array */
-    private function transport(): callable
+    private function transport(int $timeout): callable
     {
-        $httpClient = $this->httpClient;
-        return function (string $url, array $body, array $headers) use ($httpClient): array {
-            $response = $httpClient->postJson($url, $body, $headers, true);
-            return is_array($response) ? $response : [];
+        return function (string $url, array $body, array $headers) use ($timeout): array {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($body),
+                CURLOPT_HTTPHEADER => $headers,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => $timeout,
+                CURLOPT_CONNECTTIMEOUT => 10,
+            ]);
+            $raw = curl_exec($ch);
+            $err = curl_error($ch);
+            curl_close($ch);
+            if ($raw === false || $raw === '') {
+                throw new \RuntimeException('KanAI LLM request failed: ' . ($err !== '' ? $err : 'empty response'));
+            }
+            $json = json_decode($raw, true);
+            return is_array($json) ? $json : [];
         };
     }
 }
