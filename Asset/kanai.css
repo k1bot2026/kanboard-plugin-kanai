@@ -1,0 +1,9 @@
+.kanai-history { margin-bottom: 15px; }
+.kanai-msg { padding: 8px 10px; margin-bottom: 6px; border-radius: 4px; }
+.kanai-msg-user { background: #f0f4ff; }
+.kanai-msg-assistant { background: #f6f6f6; }
+.kanai-proposals { border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 15px; }
+.kanai-ask textarea { width: 100%; }
+.kanai-busy { opacity: .6; }
+.kanai-skills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.kanai-skill-form { display: inline; margin: 0; }

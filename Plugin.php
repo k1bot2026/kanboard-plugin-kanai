@@ -13,6 +13,20 @@ class Plugin extends Base
         $this->route->addRoute('/kanai/config', 'ConfigController', 'show', 'KanAI');
         $this->applicationAccessMap->add('ConfigController', '*', Role::APP_ADMIN);
         $this->template->hook->attach('template:config:sidebar', 'KanAI:config/sidebar');
+
+        // Per-project assistant
+        $this->route->addRoute('/kanai/project/:project_id', 'AssistantController', 'index', 'KanAI');
+        $this->route->addRoute('/kanai/project/:project_id/ask', 'AssistantController', 'ask', 'KanAI');
+        $this->route->addRoute('/kanai/project/:project_id/clear', 'AssistantController', 'clear', 'KanAI');
+        $this->route->addRoute('/kanai/project/:project_id/proposals/apply', 'ActionController', 'apply', 'KanAI');
+        $this->route->addRoute('/kanai/project/:project_id/proposals/reject', 'ActionController', 'reject', 'KanAI');
+
+        $this->projectAccessMap->add('AssistantController', '*', Role::PROJECT_MEMBER);
+        $this->projectAccessMap->add('ActionController', '*', Role::PROJECT_MEMBER);
+
+        $this->template->hook->attach('template:project:sidebar', 'KanAI:project/sidebar');
+        $this->hook->on('template:layout:js', ['template' => 'plugins/KanAI/Asset/kanai.js']);
+        $this->hook->on('template:layout:css', ['template' => 'plugins/KanAI/Asset/kanai.css']);
     }
 
     public function getClasses(): array
