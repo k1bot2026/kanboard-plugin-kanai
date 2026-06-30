@@ -14,7 +14,13 @@ class AssistantService extends Base
         $budget = (int) $settings['kanai_max_context_tokens'];
         $maxOut = (int) $settings['kanai_max_output_tokens'];
 
-        $ctx = $this->contextBuilderModel->build($projectId, $question, $budget);
+        $contextBuilder = new ContextBuilderModel(
+            $this->taskFinderModel,
+            $this->commentModel,
+            $this->subtaskModel,
+            $this->projectModel
+        );
+        $ctx = $contextBuilder->build($projectId, $question, $budget);
         $client = $this->llmClientFactory->forProject($projectId, $provider);
 
         // Recent history (excluding the not-yet-saved current question) for multi-turn.
