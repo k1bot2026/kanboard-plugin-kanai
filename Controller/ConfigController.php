@@ -20,6 +20,7 @@ class ConfigController extends BaseController
 
     public function save(): void
     {
+        $this->checkCSRFParam();
         $values = $this->request->getValues();
         $this->settingsModel->saveGlobal($values);
         $this->flash->success(t('Settings saved.'));

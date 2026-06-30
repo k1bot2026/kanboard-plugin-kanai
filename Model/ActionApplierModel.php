@@ -38,6 +38,9 @@ class ActionApplierModel extends Base
 
             case 'move_task':
                 $task = $this->taskFinderModel->getById($taskId);
+                if (! $task) {
+                    throw new RuntimeException('move_task: task not found: ' . $taskId);
+                }
                 $this->taskPositionModel->movePosition(
                     $projectId,
                     $taskId,

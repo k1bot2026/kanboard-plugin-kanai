@@ -23,6 +23,16 @@ external AI off with a single, server-enforced kill switch.
 - **Global:** Settings → KanAI (admin only) — set LLM endpoint/key, enable/disable external providers.
 - **Per-project:** open a project → **KanAI Settings** in the sidebar (project managers only) — enable KanAI for that project and opt in to external AI providers.
 
+### Production note: encryption key
+
+KanAI encrypts external-provider API keys at rest. For production, set a stable
+secret in your Kanboard `config.php`:
+
+    define('KANAI_SECRET', 'a-long-random-string');
+
+If unset, KanAI generates a per-install key and stores it in the database
+(weaker, but keys are never stored in plaintext).
+
 ## Install
 
 Symlink or copy this folder into your Kanboard `plugins/` directory as `KanAI`:
