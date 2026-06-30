@@ -29,6 +29,18 @@ class Plugin extends Base
         $this->projectAccessMap->add('ProjectSettingsController', '*', Role::PROJECT_MANAGER);
 
         $this->template->hook->attach('template:project:sidebar', 'KanAI:project/sidebar');
+
+        // KanAI tab in the project view switcher (next to Overview / Board / List),
+        // shown only when KanAI is enabled for the project.
+        $container = $this->container;
+        $this->template->hook->attachCallable(
+            'template:project-header:view-switcher',
+            'KanAI:project/view_switcher',
+            function ($project, $filters = null) use ($container) {
+                return ['kanai_enabled' => $container['settingsModel']->getProjectEnabled((int) $project['id'])];
+            }
+        );
+
         $this->hook->on('template:layout:js', ['template' => 'plugins/KanAI/Asset/kanai.js']);
         $this->hook->on('template:layout:css', ['template' => 'plugins/KanAI/Asset/kanai.css']);
     }
