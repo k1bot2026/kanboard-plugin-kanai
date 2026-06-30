@@ -44,7 +44,7 @@ $kanaiActionMeta = array(
                     <?php endforeach ?>
                 </ul>
                 <div class="kanai-proposals-foot">
-                    <button type="submit" class="btn btn-green"><?= t('Apply selected') ?></button>
+                    <button type="submit" class="btn btn-blue"><?= t('Apply selected') ?></button>
                     <?= $this->url->link(t('Reject all'), 'ActionController', 'reject', ['project_id' => $project['id'], 'proposal_set_id' => $set['id'], 'plugin' => 'KanAI'], true, 'btn btn-red') ?>
                 </div>
             </form>

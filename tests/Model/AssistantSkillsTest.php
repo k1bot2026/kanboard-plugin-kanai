@@ -7,21 +7,26 @@ use PHPUnit\Framework\TestCase;
 
 final class AssistantSkillsTest extends TestCase
 {
-    public function testAllReturnsSixSkillsWithRequiredKeys(): void
+    public function testAllReturnsSkillsWithRequiredKeys(): void
     {
         $skills = AssistantSkills::all();
-        $this->assertCount(6, $skills);
+        $this->assertCount(10, $skills);
+        $keys = [];
         foreach ($skills as $s) {
             $this->assertArrayHasKey('key', $s);
             $this->assertArrayHasKey('label', $s);
             $this->assertArrayHasKey('instruction', $s);
             $this->assertNotSame('', $s['instruction']);
+            $keys[] = $s['key'];
         }
+        // keys are unique
+        $this->assertSame($keys, array_values(array_unique($keys)));
     }
 
     public function testInstructionForKnownAndUnknownKey(): void
     {
         $this->assertNotNull(AssistantSkills::instructionFor('summary'));
+        $this->assertNotNull(AssistantSkills::instructionFor('standup'));
         $this->assertNull(AssistantSkills::instructionFor('nope'));
     }
 }
