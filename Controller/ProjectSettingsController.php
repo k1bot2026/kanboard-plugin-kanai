@@ -21,6 +21,7 @@ class ProjectSettingsController extends BaseController
     public function save(): void
     {
         $project = $this->getProject();
+        $this->checkCSRFParam();
         $values = $this->request->getValues();
         $this->settingsModel->saveProject(
             (int) $project['id'],
