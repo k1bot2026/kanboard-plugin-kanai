@@ -9,6 +9,7 @@ class ActionController extends BaseController
     public function apply(): void
     {
         $project = $this->getProject();
+        $this->checkCSRFParam();
         $userId = (int) $this->userSession->getId();
         $setId = (int) $this->request->getIntegerParam('proposal_set_id');
         $approvedIndexes = array_map('intval', (array) $this->request->getValue('approve'));

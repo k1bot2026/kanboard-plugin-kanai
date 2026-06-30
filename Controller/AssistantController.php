@@ -22,6 +22,7 @@ class AssistantController extends BaseController
     public function ask(): void
     {
         $project = $this->getProject();
+        $this->checkCSRFParam();
         $userId = $this->userSession->getId();
         $question = trim($this->request->getStringParam('question'));
         $provider = $this->request->getStringParam('provider');
