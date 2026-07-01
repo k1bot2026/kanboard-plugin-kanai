@@ -178,6 +178,23 @@
 .kanai-rename-form input[type=text] { flex: 1 1 auto; border-radius: 8px; box-sizing: border-box; }
 .kanai-rename-cancel { color: var(--kanai-muted); text-decoration: none; font-size: 12.5px; }
 
+/* Assistant message metadata (model · duration) */
+.kanai-msg-meta { color: var(--kanai-muted); font-size: 11px; margin-top: 4px; }
+
+/* Config page: provider badges + connection tests */
+.kanai-badge {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    border-radius: 999px; padding: 1px 9px; margin-left: 6px;
+    background: var(--kanai-surface-strong); color: var(--kanai-muted);
+    vertical-align: middle;
+}
+.kanai-badge-ok { background: rgba(47, 158, 68, .15); color: #2f9e44; }
+.kanai-test-result { margin-left: 8px; font-size: 12.5px; }
+.kanai-test-result.is-ok { color: #2f9e44; }
+.kanai-test-result.is-fail { color: #d14836; }
+.kanai-config fieldset { margin-bottom: 22px; }
+.kanai-config h4 { margin: 14px 0 8px; }
+
 @media (max-width: 768px) {
     .kanai-layout { flex-direction: column; }
     .kanai-convlist { flex: 1 1 auto; width: 100%; }

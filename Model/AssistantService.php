@@ -22,6 +22,8 @@ class AssistantService extends Base
         );
         $ctx = $contextBuilder->build($projectId, $question, $budget);
         $client = $this->llmClientFactory->forProject($projectId, $provider);
+        $llmInfo = $this->llmClientFactory->infoForProject($projectId, $provider);
+        $startedAt = microtime(true);
 
         // Recent history of THIS conversation (last 10 turns) for multi-turn context.
         $messages = [];
@@ -44,8 +46,12 @@ class AssistantService extends Base
             $parsed = ProposalValidator::parse($repair);
         }
 
+        $durationMs = (int) round((microtime(true) - $startedAt) * 1000);
         $this->conversationModel->addMessage($conversationId, $projectId, $userId, 'user', $question);
-        $assistantMsgId = $this->conversationModel->addMessage($conversationId, $projectId, $userId, 'assistant', $parsed['answer']);
+        $assistantMsgId = $this->conversationModel->addMessage(
+            $conversationId, $projectId, $userId, 'assistant', $parsed['answer'],
+            $llmInfo['model'], $durationMs
+        );
 
         $proposalSetId = null;
         if (! empty($parsed['proposals'])) {

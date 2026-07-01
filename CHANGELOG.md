@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.4.0 — 2026-07-02
+
+### Added
+- Reworked admin settings screen: sections with inline help, provider status
+  badges, and a **Test connection** button per provider. Testing the local LLM
+  discovers the available models and offers them as suggestions for the model
+  field; external tests validate the API key without saving.
+- Rate limiting: `kanai_rate_limit_per_hour` (default 30, 0 = unlimited) caps
+  questions per user per hour; exceeded requests are refused before any LLM
+  call (HTTP 429 on AJAX).
+- Observability: assistant messages record which model answered and how long it
+  took (schema v4), shown subtly under each answer (e.g. "qwen2.5-coder:7b · 8.3s").
+
+### Fixed
+- The admin settings page fataled on render since 1.0.0 (`checkMenuSelection`
+  received an array in the config sidebar); found by loading the page over real
+  HTTP for the first time.
+- `kanai_request_timeout` is now clamped to a sane minimum (10s) on save.
+
 ## 1.3.0 — 2026-07-01
 
 ### Added

@@ -58,6 +58,27 @@ return array(
     'Auto digest' => 'Automatische digest',
     'Enable the automatic daily digest (requires the kanai:digest cron job)' => 'Automatische dagelijkse digest inschakelen (vereist de kanai:digest cronjob)',
 
+    // Config screen (v1.4)
+    'An OpenAI-compatible server such as Ollama, LM Studio or vLLM. All project data stays on your own machine.' => 'Een OpenAI-compatibele server zoals Ollama, LM Studio of vLLM. Alle projectgegevens blijven op je eigen machine.',
+    'When Kanboard runs in Docker, use http://host.docker.internal:11434/v1 to reach the host.' => 'Draait Kanboard in Docker, gebruik dan http://host.docker.internal:11434/v1 om de host te bereiken.',
+    'Tip: press "Test connection" to discover the models available on the server.' => 'Tip: klik op "Test verbinding" om de beschikbare modellen op de server op te halen.',
+    'Test connection' => 'Test verbinding',
+    '%d model(s) available' => '%d model(len) beschikbaar',
+    'API key accepted' => 'API-sleutel geaccepteerd',
+    'API key accepted (model: %s)' => 'API-sleutel geaccepteerd (model: %s)',
+    'No API key configured' => 'Geen API-sleutel ingesteld',
+    'No response from endpoint' => 'Geen reactie van het endpoint',
+    'Endpoint did not return JSON' => 'Endpoint gaf geen JSON terug',
+    'configured' => 'ingesteld',
+    'not configured' => 'niet ingesteld',
+    'Local LLM' => 'Lokaal LLM',
+    'When off, only the local LLM is used — no project data leaves this server. Projects must additionally opt in individually.' => 'Indien uit wordt alleen het lokale LLM gebruikt — er verlaten geen projectgegevens deze server. Projecten moeten daarnaast individueel opt-in geven.',
+    'How much project data is packed into a question. Larger = better answers, slower and heavier for the model.' => 'Hoeveel projectdata er in een vraag meegaat. Groter = betere antwoorden, maar trager en zwaarder voor het model.',
+    'Local models can take a while; 120–180s is a safe range for larger models.' => 'Lokale modellen kunnen even duren; 120–180s is een veilige marge voor grotere modellen.',
+    'Rate limit (questions per user per hour, 0 = unlimited)' => 'Limiet (vragen per gebruiker per uur, 0 = onbeperkt)',
+    'Rate limit reached (%d questions per hour). Try again later.' => 'Limiet bereikt (%d vragen per uur). Probeer het later opnieuw.',
+    'Conversations idle longer than this are removed automatically.' => 'Gesprekken die langer dan dit inactief zijn worden automatisch verwijderd.',
+
     // Settings (admin + project)
     'KanAI Settings' => 'KanAI-instellingen',
     'Local LLM (default)' => 'Lokaal LLM (standaard)',

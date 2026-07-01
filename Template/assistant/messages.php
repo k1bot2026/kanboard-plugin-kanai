@@ -30,6 +30,11 @@
                     <?= nl2br($this->text->e($m['content'])) ?>
                 <?php endif ?>
             </div>
+            <?php if ($m['role'] === 'assistant' && ! empty($m['model'])): ?>
+                <div class="kanai-msg-meta">
+                    <?= $this->text->e($m['model']) ?><?= ! empty($m['duration_ms']) ? ' · ' . round($m['duration_ms'] / 1000, 1) . 's' : '' ?>
+                </div>
+            <?php endif ?>
         </div>
     </div>
 <?php endforeach ?>

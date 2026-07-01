@@ -4,7 +4,14 @@ namespace Kanboard\Plugin\KanAI\Schema;
 
 use PDO;
 
-const VERSION = 3;
+const VERSION = 4;
+
+function version_4(PDO $pdo): void
+{
+    // Observability: which model answered and how long it took.
+    $pdo->exec('ALTER TABLE kanai_messages ADD COLUMN model TEXT NOT NULL DEFAULT \'\'');
+    $pdo->exec('ALTER TABLE kanai_messages ADD COLUMN duration_ms INTEGER NOT NULL DEFAULT 0');
+}
 
 function version_3(PDO $pdo): void
 {

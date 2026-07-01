@@ -36,6 +36,26 @@ class LlmClientFactory extends Base
         }
     }
 
+    /**
+     * Resolve which provider+model a project's request would use (same gating
+     * as forProject, without building a client). For logging/metadata.
+     * @return array{provider:string,model:string}
+     */
+    public function infoForProject(int $projectId, string $requestedProvider = ''): array
+    {
+        $settings = $this->settingsModel->getGlobal();
+        $requested = $requestedProvider !== '' ? $requestedProvider : $settings['kanai_default_provider'];
+        $provider = GatingPolicy::resolveProvider(
+            $this->settingsModel->getProjectEnabled($projectId),
+            $requested,
+            $this->settingsModel->isExternalEnabled(),
+            $this->settingsModel->getProjectExternalOptIn($projectId)
+        );
+        $modelKey = ['anthropic' => 'kanai_anthropic_model', 'openai' => 'kanai_openai_model'];
+        $model = $settings[$modelKey[$provider] ?? 'kanai_local_model'];
+        return ['provider' => $provider, 'model' => $model];
+    }
+
     /** @return callable fn(string $url, array $body, array $headers): array */
     private function transport(int $timeout): callable
     {

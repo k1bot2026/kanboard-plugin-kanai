@@ -67,6 +67,19 @@ class AssistantController extends BaseController
             return;
         }
 
+        // Rate limit: cap questions per user per hour (0 = unlimited).
+        $limit = (int) ($this->settingsModel->getGlobal()['kanai_rate_limit_per_hour'] ?? 0);
+        if ($limit > 0 && $this->conversationModel->countRecentUserMessages($userId, time() - 3600) >= $limit) {
+            $message = t('Rate limit reached (%d questions per hour). Try again later.', $limit);
+            if ($this->request->isAjax()) {
+                $this->response->json(['error' => $message], 429);
+                return;
+            }
+            $this->flash->failure($message);
+            $this->response->redirect($this->indexUrl($project, $conversationId));
+            return;
+        }
+
         // Resolve the conversation; create a fresh one when none is active.
         if ($conversationId > 0) {
             $conv = $this->conversationModel->getConversation($conversationId);

@@ -165,6 +165,57 @@
         }
     });
 
+    // Config page: provider connection tests.
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest && e.target.closest('.kanai-test-btn');
+        if (! btn) {
+            return;
+        }
+        e.preventDefault();
+        var form = btn.closest('form');
+        var out = document.getElementById('kanai-test-result-' + btn.dataset.provider);
+        var fd = new FormData();
+        var csrf = form.querySelector('input[name=csrf_token]');
+        if (csrf) { fd.append('csrf_token', csrf.value); }
+        fd.append('provider', btn.dataset.provider);
+        if (btn.dataset.provider === 'local') {
+            var base = form.querySelector('input[name=kanai_local_base_url]');
+            if (base) { fd.append('base_url', base.value); }
+        }
+        if (btn.dataset.keyField) {
+            var keyInput = form.querySelector('input[name=' + btn.dataset.keyField + ']');
+            if (keyInput && keyInput.value.trim() !== '') { fd.append('api_key', keyInput.value.trim()); }
+        }
+        btn.disabled = true;
+        if (out) { out.textContent = '…'; out.className = 'kanai-test-result'; }
+        fetch(form.dataset.testUrl, {
+            method: 'POST',
+            body: fd,
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        }).then(function (r) { return r.json(); }).then(function (d) {
+            btn.disabled = false;
+            if (out) {
+                out.textContent = (d.ok ? '✓ ' : '✗ ') + (d.detail || '');
+                out.className = 'kanai-test-result ' + (d.ok ? 'is-ok' : 'is-fail');
+            }
+            if (d.models && d.models.length) {
+                var list = document.getElementById('kanai-local-models');
+                if (list) {
+                    list.innerHTML = '';
+                    d.models.forEach(function (m) {
+                        var opt = document.createElement('option');
+                        opt.value = m;
+                        list.appendChild(opt);
+                    });
+                }
+            }
+        }).catch(function () {
+            btn.disabled = false;
+            if (out) { out.textContent = '✗ request failed'; out.className = 'kanai-test-result is-fail'; }
+        });
+    });
+
     // Toggle the conversation rename form.
     document.addEventListener('click', function (e) {
         if (! e.target.closest) {

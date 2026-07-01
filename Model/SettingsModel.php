@@ -18,6 +18,7 @@ class SettingsModel extends Base
         'kanai_max_output_tokens' => '1024',
         'kanai_request_timeout' => '120',
         'kanai_history_retention_days' => '0',
+        'kanai_rate_limit_per_hour' => '30',
     ];
 
     public function crypto(): Crypto
@@ -61,6 +62,8 @@ class SettingsModel extends Base
             'kanai_max_context_tokens' => (string) max(500, (int) ($values['kanai_max_context_tokens'] ?? 8000)),
             'kanai_max_output_tokens' => (string) max(128, (int) ($values['kanai_max_output_tokens'] ?? 1024)),
             'kanai_history_retention_days' => (string) max(0, (int) ($values['kanai_history_retention_days'] ?? 0)),
+            'kanai_request_timeout' => (string) max(10, (int) ($values['kanai_request_timeout'] ?? 120)),
+            'kanai_rate_limit_per_hour' => (string) max(0, (int) ($values['kanai_rate_limit_per_hour'] ?? 30)),
         ];
         // The admin form leaves a key field EMPTY to keep the stored key (the
         // saved key is shown only as a masked hint, never pre-filled into the

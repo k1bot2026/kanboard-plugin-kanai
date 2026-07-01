@@ -78,7 +78,7 @@ class ConversationModel extends Base
 
     // ── Messages ─────────────────────────────────────────────────────────
 
-    public function addMessage(int $conversationId, int $projectId, int $userId, string $role, string $content): int
+    public function addMessage(int $conversationId, int $projectId, int $userId, string $role, string $content, string $model = '', int $durationMs = 0): int
     {
         $this->db->table(self::T_MESSAGES)->insert([
             'conversation_id' => $conversationId,
@@ -86,10 +86,22 @@ class ConversationModel extends Base
             'user_id' => $userId,
             'role' => $role,
             'content' => $content,
+            'model' => $model,
+            'duration_ms' => $durationMs,
             'created_at' => time(),
         ]);
         $this->touchConversation($conversationId);
         return (int) $this->db->getLastId();
+    }
+
+    /** Number of questions a user asked (across projects) since the given timestamp. */
+    public function countRecentUserMessages(int $userId, int $since): int
+    {
+        return (int) $this->db->table(self::T_MESSAGES)
+            ->eq('user_id', $userId)
+            ->eq('role', 'user')
+            ->gte('created_at', $since)
+            ->count();
     }
 
     /**
