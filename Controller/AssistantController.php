@@ -4,6 +4,7 @@ namespace Kanboard\Plugin\KanAI\Controller;
 
 use Kanboard\Controller\BaseController;
 use Kanboard\Plugin\KanAI\Model\ConversationModel;
+use Kanboard\Plugin\KanAI\Model\ConversationTitle;
 
 class AssistantController extends BaseController
 {
@@ -73,7 +74,7 @@ class AssistantController extends BaseController
             $conversationId = $this->conversationModel->createConversation(
                 (int) $project['id'],
                 $userId,
-                ConversationModel::titleFrom($question)
+                ConversationTitle::from($question)
             );
         }
 
@@ -113,7 +114,7 @@ class AssistantController extends BaseController
         $title = isset($values['title']) ? trim($values['title']) : '';
         $conv = $this->conversationModel->getConversation($convId);
         if ($conv && (int) $conv['project_id'] === (int) $project['id'] && $title !== '') {
-            $this->conversationModel->renameConversation($convId, ConversationModel::titleFrom($title));
+            $this->conversationModel->renameConversation($convId, ConversationTitle::from($title));
             $this->flash->success(t('Conversation renamed.'));
         }
         $this->response->redirect($this->indexUrl($project, $convId));

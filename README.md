@@ -5,23 +5,41 @@ KanAI connects a Kanboard instance to an LLM. It works **fully on a local LLM**
 use external providers (Anthropic Claude, OpenAI). An administrator can switch all
 external AI off with a single, server-enforced kill switch.
 
-## Capabilities (v1)
+## Capabilities
 
-- **Ask / RAG** — ask questions about a project and get answers grounded in its
+- **Shared chat per project** — a KanAI tab next to Overview / Board / List opens
+  a chat panel with multiple conversations (create, rename, delete). Conversations
+  are shared with every project member, so a colleague can pick up where you left
+  off; each message shows the sender's avatar and name.
+- **Ask / RAG** — ask questions about the project and get answers grounded in its
   tasks, descriptions, comments and subtasks. Read-only.
-- **Assistant** — the AI proposes maintenance actions (create/close/move/tag/
-  assign tasks, set due dates, add comments). Every state-changing action is
-  reviewed and approved by a human before it is applied through Kanboard's own
-  models, as the approving user.
+- **Quick actions** — one-click presets: project summary, what's next, board
+  health, stand-up notes, cleanup suggestions, risks & blockers, workload,
+  organize, enrich tasks, and help & explain.
+- **Assistant with approval** — the AI proposes maintenance actions (create /
+  update / close / reopen / move / assign tasks, tags, due dates, comments,
+  subtasks, task links). Every state-changing action is reviewed and approved by
+  a human before it is applied through Kanboard's own models, as the approving
+  user.
 
 ## Status
 
-`1.0.0` — Ask/RAG + approval-gated assistant. Local LLM default; external providers admin-gated.
+`1.1.0` — shared multi-conversation chat, 10 quick actions, 11 approval-gated
+actions. Local LLM default; external providers admin-gated. Verified end-to-end
+against Ollama (chat, proposals, apply flow, multi-user sharing).
 
 ## Configure
 
-- **Global:** Settings → KanAI (admin only) — set LLM endpoint/key, enable/disable external providers.
-- **Per-project:** open a project → **KanAI Settings** in the sidebar (project managers only) — enable KanAI for that project and opt in to external AI providers.
+- **Global:** Settings → KanAI (admin only) — LLM endpoint/model, API keys,
+  external-provider kill switch, token limits, request timeout, history retention.
+- **Per-project:** open a project → **KanAI Settings** in the sidebar (project
+  managers only) — enable KanAI for that project and opt in to external AI
+  providers. The KanAI tab and features appear only when enabled.
+
+Recommended local setup: Ollama with a ~7B model (e.g. `qwen2.5-coder:7b`)
+answers in seconds; larger models give richer answers but take longer. When
+Kanboard runs in Docker, use `http://host.docker.internal:11434/v1` as the base
+URL.
 
 ### Production note: encryption key
 
@@ -39,7 +57,19 @@ Symlink or copy this folder into your Kanboard `plugins/` directory as `KanAI`:
 
     ln -s /absolute/path/to/KanAI <kanboard>/plugins/KanAI
 
-Then open **Settings → Plugins** to confirm KanAI is listed.
+For Docker, bind-mount the folder to `/var/www/app/plugins/KanAI`. Then open
+**Settings → Plugins** to confirm KanAI is listed, and enable it per project.
+
+Requirements: Kanboard >= 1.2.46, PHP >= 7.4 with cURL and OpenSSL.
+
+## Development
+
+Pure-logic classes are unit-tested standalone:
+
+    php composer.phar install
+    ./vendor/bin/phpunit
+
+Design docs and build plans live in `docs/superpowers/`.
 
 ## License
 

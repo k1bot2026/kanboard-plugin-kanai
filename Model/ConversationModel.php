@@ -181,16 +181,4 @@ class ConversationModel extends Base
         return $count;
     }
 
-    /** Build a short conversation title from the first user message. */
-    public static function titleFrom(string $text): string
-    {
-        $t = trim(preg_replace('/\s+/', ' ', $text));
-        if ($t === '') {
-            return '';
-        }
-        if (mb_strlen($t) > 48) {
-            $t = mb_substr($t, 0, 48) . '…';
-        }
-        return $t;
-    }
 }
