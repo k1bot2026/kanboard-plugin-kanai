@@ -154,6 +154,7 @@ class ContextBuilderModel
             . '{"answer": string, "proposals": [{"action": one of '
             . '["create_task","update_task","close_task","reopen_task","move_task","assign_task","add_tag","set_due_date","add_comment","add_subtask","link_tasks"], '
             . '"task_id": number|null, "params": object, "reason": string}]}. '
+            . "The answer string may use Markdown formatting (headings, lists, bold, tables). "
             . "Use an empty proposals array for read-only answers. params carries action-specific fields "
             . "(e.g. move_task -> column_id; assign_task -> owner_id; add_tag -> tags[]; set_due_date -> date_due; "
             . "add_comment -> comment; add_subtask -> title; link_tasks -> opposite_task_id, link_label; "

@@ -38,6 +38,33 @@
     background: var(--kanai-user-tint); border-color: var(--kanai-user-border);
 }
 
+/* Markdown inside assistant bubbles */
+.kanai-msg-text > :first-child { margin-top: 0; }
+.kanai-msg-text > :last-child { margin-bottom: 0; }
+.kanai-msg-text p { margin: 0 0 8px; }
+.kanai-msg-text ul, .kanai-msg-text ol { margin: 4px 0 8px; padding-left: 22px; }
+.kanai-msg-text li { margin-bottom: 3px; }
+.kanai-msg-text h1, .kanai-msg-text h2, .kanai-msg-text h3 {
+    font-size: 14px; font-weight: 600; margin: 10px 0 6px; border: none; padding: 0;
+}
+.kanai-msg-text code {
+    background: var(--kanai-surface-strong); border-radius: 4px;
+    padding: 1px 5px; font-size: 12.5px;
+}
+.kanai-msg-text pre {
+    background: var(--kanai-surface-strong); border-radius: 8px;
+    padding: 9px 12px; overflow-x: auto; margin: 6px 0 8px;
+}
+.kanai-msg-text pre code { background: none; padding: 0; }
+.kanai-msg-text table { border-collapse: collapse; margin: 6px 0 8px; }
+.kanai-msg-text th, .kanai-msg-text td {
+    border: 1px solid var(--kanai-border); padding: 4px 9px; font-size: 12.5px;
+}
+.kanai-msg-text blockquote {
+    border-left: 3px solid var(--kanai-border); margin: 6px 0 8px; padding: 2px 12px;
+    color: var(--kanai-muted);
+}
+
 /* Empty / welcome state */
 .kanai-welcome { text-align: center; padding: 26px 16px 8px; color: var(--kanai-muted); }
 .kanai-welcome-icon { font-size: 34px; margin-bottom: 8px; }

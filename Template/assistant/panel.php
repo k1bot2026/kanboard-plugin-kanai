@@ -73,7 +73,13 @@
                                     <?= t('You') ?>
                                 <?php endif ?>
                             </div>
-                            <div class="kanai-msg-text"><?= nl2br($this->text->e($m['content'])) ?></div>
+                            <div class="kanai-msg-text">
+                                <?php if ($m['role'] === 'assistant'): ?>
+                                    <?= $this->text->markdown($m['content']) ?>
+                                <?php else: ?>
+                                    <?= nl2br($this->text->e($m['content'])) ?>
+                                <?php endif ?>
+                            </div>
                         </div>
                     </div>
                 <?php endforeach ?>
@@ -89,7 +95,7 @@
                     <?= $this->form->csrf() ?>
                     <input type="hidden" name="skill" value="<?= $this->text->e($skill['key']) ?>">
                     <input type="hidden" name="conversation_id" value="<?= (int) $active_id ?>">
-                    <button type="submit" class="kanai-skill"><?= $this->text->e($skill['label']) ?></button>
+                    <button type="submit" class="kanai-skill"><?= $this->text->e(t($skill['label'])) ?></button>
                 </form>
             <?php endforeach ?>
         </div>

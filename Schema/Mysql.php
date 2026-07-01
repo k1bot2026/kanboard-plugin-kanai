@@ -4,7 +4,14 @@ namespace Kanboard\Plugin\KanAI\Schema;
 
 use PDO;
 
-const VERSION = 2;
+const VERSION = 3;
+
+function version_3(PDO $pdo): void
+{
+    // Purge scans by updated_at across projects; give it a dedicated index.
+    // (MySQL has no CREATE INDEX IF NOT EXISTS on older versions; migrations run once.)
+    $pdo->exec('CREATE INDEX idx_kanai_conv_updated ON kanai_conversations(updated_at)');
+}
 
 function version_2(PDO $pdo): void
 {

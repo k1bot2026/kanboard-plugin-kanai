@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.0 — 2026-07-01
+
+### Added
+- Markdown rendering of assistant answers via Kanboard's own safe renderer
+  (headings, lists, bold, tables, code). Task references like `#9` become
+  clickable task links automatically.
+- Dutch translation (nl_NL) of the full UI, including the quick-action labels.
+  Plugin translations are now loaded on startup (`onStartup` + `Translator::load`).
+- Schema v3: index on `kanai_conversations.updated_at` for the retention purge.
+
 ## 1.1.0 — 2026-07-01
 
 ### Added
