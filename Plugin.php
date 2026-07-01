@@ -5,6 +5,7 @@ namespace Kanboard\Plugin\KanAI;
 use Kanboard\Core\Plugin\Base;
 use Kanboard\Core\Security\Role;
 use Kanboard\Core\Translator;
+use Kanboard\Plugin\KanAI\Console\DigestCommand;
 
 class Plugin extends Base
 {
@@ -51,6 +52,12 @@ class Plugin extends Base
 
         $this->hook->on('template:layout:js', ['template' => 'plugins/KanAI/Asset/kanai.js']);
         $this->hook->on('template:layout:css', ['template' => 'plugins/KanAI/Asset/kanai.css']);
+
+        // Console: autonomous digest (run from cron: php cli kanai:digest).
+        // Only register in CLI context to avoid building the console app per web request.
+        if (php_sapi_name() === 'cli') {
+            $this->cli->add(new DigestCommand($this->container));
+        }
     }
 
     public function getClasses(): array
@@ -66,7 +73,7 @@ class Plugin extends Base
     public function getPluginName(): string { return 'KanAI'; }
     public function getPluginDescription(): string { return 'AI assistant & project Q&A (RAG) for Kanboard — local LLM first, optional external providers'; }
     public function getPluginAuthor(): string { return 'k1bot2026'; }
-    public function getPluginVersion(): string { return '1.2.0'; }
+    public function getPluginVersion(): string { return '1.3.0'; }
     public function getCompatibleVersion(): string { return '>=1.2.46'; }
     public function getPluginHomepage(): string { return 'https://github.com/k1bot2026/kanboard-plugin-kanai'; }
 }

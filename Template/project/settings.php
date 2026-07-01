@@ -3,6 +3,7 @@
     <?= $this->form->csrf() ?>
     <?= $this->form->checkbox('kanai_enabled', t('Enable KanAI for this project'), '1', $enabled) ?>
     <?= $this->form->checkbox('kanai_external_opt_in', t('Allow external AI providers for this project'), '1', $external_opt_in) ?>
+    <?= $this->form->checkbox('kanai_auto_digest', t('Enable the automatic daily digest (requires the kanai:digest cron job)'), '1', $auto_digest) ?>
     <?php if (! $external_globally_enabled): ?>
         <p class="form-help"><?= t('External providers are globally disabled by the administrator; only the local LLM will be used regardless of this setting.') ?></p>
     <?php endif ?>

@@ -90,11 +90,17 @@ class SettingsModel extends Base
         return $this->projectMetadataModel->get($projectId, 'kanai_external_opt_in', '0') === '1';
     }
 
-    public function saveProject(int $projectId, bool $enabled, bool $externalOptIn): void
+    public function getProjectAutoDigest(int $projectId): bool
+    {
+        return $this->projectMetadataModel->get($projectId, 'kanai_auto_digest', '0') === '1';
+    }
+
+    public function saveProject(int $projectId, bool $enabled, bool $externalOptIn, bool $autoDigest = false): void
     {
         $this->projectMetadataModel->save($projectId, [
             'kanai_enabled' => $enabled ? '1' : '0',
             'kanai_external_opt_in' => $externalOptIn ? '1' : '0',
+            'kanai_auto_digest' => $autoDigest ? '1' : '0',
         ]);
     }
 }

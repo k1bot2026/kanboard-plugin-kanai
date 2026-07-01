@@ -41,6 +41,17 @@ answers in seconds; larger models give richer answers but take longer. When
 Kanboard runs in Docker, use `http://host.docker.internal:11434/v1` as the base
 URL.
 
+### Automatic daily digest (optional)
+
+Projects can opt in to an autonomous digest (project settings → "Enable the
+automatic daily digest"): KanAI starts a fresh conversation with a compact
+status/cleanup/risks report and proposals for members to review. Schedule the
+command from cron, e.g. daily at 07:00:
+
+    0 7 * * * php /path/to/kanboard/cli kanai:digest >/dev/null 2>&1
+
+(For Docker: `docker exec <container> php /var/www/app/cli kanai:digest`.)
+
 ### Production note: encryption key
 
 KanAI encrypts external-provider API keys at rest. For production, set a stable

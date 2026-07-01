@@ -53,6 +53,11 @@ return array(
     'Add subtask' => 'Subtaak toevoegen',
     'Link tasks' => 'Taken koppelen',
 
+    // Automatic digest
+    'KanAI (automatic)' => 'KanAI (automatisch)',
+    'Auto digest' => 'Automatische digest',
+    'Enable the automatic daily digest (requires the kanai:digest cron job)' => 'Automatische dagelijkse digest inschakelen (vereist de kanai:digest cronjob)',
+
     // Settings (admin + project)
     'KanAI Settings' => 'KanAI-instellingen',
     'Local LLM (default)' => 'Lokaal LLM (standaard)',

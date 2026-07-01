@@ -13,6 +13,7 @@ class ProjectSettingsController extends BaseController
             'project' => $project,
             'enabled' => $this->settingsModel->getProjectEnabled($project['id']),
             'external_opt_in' => $this->settingsModel->getProjectExternalOptIn($project['id']),
+            'auto_digest' => $this->settingsModel->getProjectAutoDigest($project['id']),
             'external_globally_enabled' => $this->settingsModel->isExternalEnabled(),
             'title' => t('KanAI Settings'),
         ]));
@@ -26,7 +27,8 @@ class ProjectSettingsController extends BaseController
         $this->settingsModel->saveProject(
             (int) $project['id'],
             ! empty($values['kanai_enabled']),
-            ! empty($values['kanai_external_opt_in'])
+            ! empty($values['kanai_external_opt_in']),
+            ! empty($values['kanai_auto_digest'])
         );
         $this->flash->success(t('Settings saved.'));
         $this->response->redirect($this->helper->url->to('ProjectSettingsController', 'show', ['project_id' => $project['id'], 'plugin' => 'KanAI']));

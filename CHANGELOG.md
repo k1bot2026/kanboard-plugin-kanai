@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.3.0 — 2026-07-01
+
+### Added
+- AJAX chat: asking a question or clicking a quick action no longer reloads the
+  page — your message appears instantly, a thinking indicator shows while the
+  model works, and the answer + proposals slot into the thread in place
+  (classic form submit remains as fallback).
+- Autonomous daily digest: a `kanai:digest` console command (run from cron)
+  generates a status/cleanup/risks digest with proposals for every project that
+  opted in via the new project setting. Digest messages render as
+  "KanAI (automatic)" with a 🤖 avatar.
+
 ## 1.2.0 — 2026-07-01
 
 ### Added

@@ -58,6 +58,10 @@ class AssistantController extends BaseController
         }
 
         if ($question === '') {
+            if ($this->request->isAjax()) {
+                $this->response->json(['error' => t('Please enter a question.')], 400);
+                return;
+            }
             $this->flash->failure(t('Please enter a question.'));
             $this->response->redirect($this->indexUrl($project, $conversationId));
             return;
@@ -88,6 +92,24 @@ class AssistantController extends BaseController
         } catch (\Throwable $e) {
             $this->conversationModel->addMessage($conversationId, (int) $project['id'], $userId, 'user', $question);
             $this->conversationModel->addMessage($conversationId, (int) $project['id'], $userId, 'assistant', 'KanAI error: ' . $e->getMessage());
+        }
+
+        if ($this->request->isAjax()) {
+            $conv = $this->conversationModel->getConversation($conversationId);
+            $newMessages = array_slice($this->conversationModel->getMessages($conversationId, 200), -2);
+            $this->response->json([
+                'conversation_id' => $conversationId,
+                'conversation_title' => $conv ? $conv['title'] : '',
+                'messages_html' => $this->template->render('KanAI:assistant/messages', [
+                    'messages' => $newMessages,
+                    'project' => $project,
+                ]),
+                'proposals_html' => $this->template->render('KanAI:assistant/proposals', [
+                    'project' => $project,
+                    'proposals' => $this->conversationModel->getPendingProposals($conversationId),
+                ]),
+            ]);
+            return;
         }
         $this->response->redirect($this->indexUrl($project, $conversationId));
     }
