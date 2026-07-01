@@ -18,6 +18,7 @@ class Plugin extends Base
         $this->route->addRoute('/kanai/project/:project_id', 'AssistantController', 'index', 'KanAI');
         $this->route->addRoute('/kanai/project/:project_id/ask', 'AssistantController', 'ask', 'KanAI');
         $this->route->addRoute('/kanai/project/:project_id/conversation/delete', 'AssistantController', 'deleteConversation', 'KanAI');
+        $this->route->addRoute('/kanai/project/:project_id/conversation/rename', 'AssistantController', 'renameConversation', 'KanAI');
         $this->route->addRoute('/kanai/project/:project_id/proposals/apply', 'ActionController', 'apply', 'KanAI');
         $this->route->addRoute('/kanai/project/:project_id/proposals/reject', 'ActionController', 'reject', 'KanAI');
 

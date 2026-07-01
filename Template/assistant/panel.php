@@ -25,6 +25,26 @@
     </aside>
 
     <section class="kanai-main">
+        <?php
+            $activeTitle = '';
+            foreach ($conversations as $c) {
+                if ((int) $c['id'] === (int) $active_id) { $activeTitle = $c['title']; break; }
+            }
+        ?>
+        <?php if ($active_id > 0): ?>
+            <div class="kanai-conv-header">
+                <span class="kanai-conv-title" id="kanai-conv-title"><?= $this->text->e($activeTitle !== '' ? $activeTitle : t('New conversation')) ?></span>
+                <a href="#" class="kanai-rename-toggle" title="<?= t('Rename') ?>"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+                <form method="post" class="kanai-rename-form" id="kanai-rename-form"
+                      action="<?= $this->url->href('AssistantController', 'renameConversation', ['project_id' => $project['id'], 'plugin' => 'KanAI']) ?>">
+                    <?= $this->form->csrf() ?>
+                    <input type="hidden" name="conversation_id" value="<?= (int) $active_id ?>">
+                    <input type="text" name="title" value="<?= $this->text->e($activeTitle) ?>" maxlength="120" autocomplete="off">
+                    <button type="submit" class="btn btn-blue"><?= t('Rename') ?></button>
+                    <a href="#" class="kanai-rename-cancel"><?= t('Cancel') ?></a>
+                </form>
+            </div>
+        <?php endif ?>
         <div class="kanai-thread" id="kanai-thread">
             <?php if (empty($messages)): ?>
                 <div class="kanai-welcome">

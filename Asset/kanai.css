@@ -142,6 +142,15 @@
 .kanai-conv-empty { color: var(--kanai-muted); font-size: 12.5px; padding: 7px 10px; }
 .kanai-msg-avatar img { width: 28px; height: 28px; border-radius: 50%; display: block; }
 
+/* Conversation title + rename */
+.kanai-conv-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.kanai-conv-title { font-size: 15px; font-weight: 600; }
+.kanai-rename-toggle { color: var(--kanai-muted); text-decoration: none; font-size: 13px; }
+.kanai-rename-toggle:hover { color: var(--kanai-accent); }
+.kanai-rename-form { display: none; align-items: center; gap: 8px; flex: 1 1 auto; }
+.kanai-rename-form input[type=text] { flex: 1 1 auto; border-radius: 8px; box-sizing: border-box; }
+.kanai-rename-cancel { color: var(--kanai-muted); text-decoration: none; font-size: 12.5px; }
+
 @media (max-width: 768px) {
     .kanai-layout { flex-direction: column; }
     .kanai-convlist { flex: 1 1 auto; width: 100%; }

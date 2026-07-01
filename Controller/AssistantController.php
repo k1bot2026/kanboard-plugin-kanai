@@ -104,6 +104,21 @@ class AssistantController extends BaseController
         $this->response->redirect($this->helper->url->to('AssistantController', 'index', ['project_id' => $project['id'], 'plugin' => 'KanAI']));
     }
 
+    public function renameConversation(): void
+    {
+        $project = $this->getProject();
+        // getValues() returns the POST data and auto-validates the CSRF token.
+        $values = $this->request->getValues();
+        $convId = (int) (isset($values['conversation_id']) ? $values['conversation_id'] : 0);
+        $title = isset($values['title']) ? trim($values['title']) : '';
+        $conv = $this->conversationModel->getConversation($convId);
+        if ($conv && (int) $conv['project_id'] === (int) $project['id'] && $title !== '') {
+            $this->conversationModel->renameConversation($convId, ConversationModel::titleFrom($title));
+            $this->flash->success(t('Conversation renamed.'));
+        }
+        $this->response->redirect($this->indexUrl($project, $convId));
+    }
+
     private function indexUrl(array $project, int $conversationId): string
     {
         $params = ['project_id' => $project['id'], 'plugin' => 'KanAI'];

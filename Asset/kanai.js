@@ -46,6 +46,33 @@
         }
     });
 
+    // Toggle the conversation rename form.
+    document.addEventListener('click', function (e) {
+        if (! e.target.closest) {
+            return;
+        }
+        var toggle = e.target.closest('.kanai-rename-toggle');
+        var cancel = e.target.closest('.kanai-rename-cancel');
+        if (! toggle && ! cancel) {
+            return;
+        }
+        e.preventDefault();
+        var form = document.getElementById('kanai-rename-form');
+        var title = document.getElementById('kanai-conv-title');
+        var show = !! toggle;
+        if (form) {
+            form.style.display = show ? 'flex' : 'none';
+        }
+        if (title) {
+            title.style.display = show ? 'none' : '';
+        }
+        var input = form && form.querySelector('input[name=title]');
+        if (show && input) {
+            input.focus();
+            input.select();
+        }
+    });
+
     // After a reply loads, jump to the newest message.
     window.addEventListener('load', function () {
         var msgs = document.querySelectorAll('.kanai-thread .kanai-msg');
