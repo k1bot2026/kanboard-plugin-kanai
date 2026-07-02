@@ -37,6 +37,12 @@ class OpenAiCompatibleClient implements LLMClientInterface
         if (! empty($opts['max_tokens'])) {
             $body['max_tokens'] = (int) $opts['max_tokens'];
         }
+        if (! empty($opts['json'])) {
+            // Force strict JSON output. Supported by OpenAI and by local servers
+            // (Ollama/LM Studio/vLLM) via their OpenAI-compatible layer; greatly
+            // improves envelope reliability on smaller local models.
+            $body['response_format'] = ['type' => 'json_object'];
+        }
         return $body;
     }
 

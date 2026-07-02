@@ -16,6 +16,14 @@ final class OpenAiCompatibleClientTest extends TestCase
         $this->assertSame(256, $body['max_tokens']);
         $this->assertSame(['role' => 'system', 'content' => 'SYS'], $body['messages'][0]);
         $this->assertSame(['role' => 'user', 'content' => 'hi'], $body['messages'][1]);
+        $this->assertArrayNotHasKey('response_format', $body);
+    }
+
+    public function testJsonModeSetsResponseFormat(): void
+    {
+        $client = new OpenAiCompatibleClient(fn() => [], 'http://x/v1', '', 'm');
+        $body = $client->buildRequest('SYS', [], ['json' => true]);
+        $this->assertSame(['type' => 'json_object'], $body['response_format']);
     }
 
     public function testParseResponseReturnsContent(): void

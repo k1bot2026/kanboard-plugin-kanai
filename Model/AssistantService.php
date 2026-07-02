@@ -33,7 +33,7 @@ class AssistantService extends Base
         }
         $messages[] = ['role' => 'user', 'content' => $ctx['context'] . "\n\nQUESTION: " . $question];
 
-        $raw = $client->complete($ctx['system'], $messages, ['max_tokens' => $maxOut]);
+        $raw = $client->complete($ctx['system'], $messages, ['max_tokens' => $maxOut, 'json' => true]);
         try {
             $parsed = ProposalValidator::parse($raw);
         } catch (RuntimeException $e) {
