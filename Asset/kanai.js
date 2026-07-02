@@ -137,12 +137,21 @@
         }).then(function (r) {
             return r.json();
         }).then(function (data) {
-            setBusy(false);
             if (data.error && ! data.messages_html) {
+                setBusy(false);
                 if (optimistic) { optimistic.remove(); }
                 showErrorBubble(data.error);
                 return;
             }
+            if (data.pending) {
+                // Async: the worker is running — keep the indicator and poll.
+                if (data.conversation_id) { updateConversationId(data); }
+                var input = q('.kanai-ask textarea');
+                if (input) { input.value = ''; }
+                pollForAnswer(form, data.conversation_id, data.after_id || 0, optimistic, 0);
+                return;
+            }
+            setBusy(false);
             handleAjaxReply(data, optimistic);
         }).catch(function () {
             // Network/parse problem: fall back to a classic full-page submit.
@@ -150,6 +159,61 @@
             form.submit();
         });
     });
+
+    function pollUrl(form, convId, afterId) {
+        // Derive the poll URL from the ask form action (…/ask -> …/poll).
+        var base = form.action.replace(/\/ask(\?|$)/, '/poll$1');
+        var sep = base.indexOf('?') === -1 ? '?' : '&';
+        return base + sep + 'conversation_id=' + encodeURIComponent(convId) + '&after=' + encodeURIComponent(afterId);
+    }
+
+    function pollForAnswer(form, convId, afterId, optimistic, attempt) {
+        if (attempt > 240) { // ~10 min safety net at 2.5s
+            setBusy(false);
+            showErrorBubble('KanAI timed out. Please try again.');
+            return;
+        }
+        setTimeout(function () {
+            fetch(pollUrl(form, convId, afterId), {
+                credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            }).then(function (r) { return r.json(); }).then(function (data) {
+                var hasAnswer = data.messages_html && data.messages_html.indexOf('kanai-msg-assistant') !== -1;
+                if (hasAnswer) {
+                    setBusy(false);
+                    handleAjaxReply(data, optimistic);
+                    return;
+                }
+                if (data.running) {
+                    pollForAnswer(form, convId, afterId, optimistic, attempt + 1);
+                } else {
+                    // Not running and no answer yet: give it a couple more ticks.
+                    pollForAnswer(form, convId, afterId, optimistic, attempt + 1);
+                }
+            }).catch(function () {
+                pollForAnswer(form, convId, afterId, optimistic, attempt + 1);
+            });
+        }, 2500);
+    }
+
+    function updateConversationId(data) {
+        document.querySelectorAll('input[name=conversation_id]').forEach(function (i) {
+            i.value = data.conversation_id;
+        });
+        var list = q('.kanai-convlist ul');
+        if (list && ! list.querySelector('.kanai-conv.is-active') && data.conversation_title) {
+            var li = document.createElement('li');
+            li.className = 'kanai-conv is-active';
+            var a = document.createElement('a');
+            a.className = 'kanai-conv-link';
+            a.href = window.location.pathname + window.location.search;
+            a.textContent = data.conversation_title;
+            li.appendChild(a);
+            var empty = list.querySelector('.kanai-conv-empty');
+            if (empty) { empty.remove(); }
+            list.insertBefore(li, list.firstChild);
+        }
+    }
 
     // Enter sends, Shift+Enter inserts a newline (chat convention).
     document.addEventListener('keydown', function (e) {

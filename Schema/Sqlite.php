@@ -4,7 +4,26 @@ namespace Kanboard\Plugin\KanAI\Schema;
 
 use PDO;
 
-const VERSION = 4;
+const VERSION = 5;
+
+function version_5(PDO $pdo): void
+{
+    // Async question processing: a job the background worker picks up so the
+    // web request never blocks on the (possibly slow) LLM call.
+    $pdo->exec('CREATE TABLE kanai_jobs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        conversation_id INTEGER NOT NULL,
+        project_id INTEGER NOT NULL,
+        user_id INTEGER DEFAULT NULL,
+        question TEXT NOT NULL,
+        provider TEXT NOT NULL DEFAULT \'\',
+        status TEXT NOT NULL DEFAULT \'queued\',
+        error TEXT NOT NULL DEFAULT \'\',
+        created_at INTEGER NOT NULL DEFAULT 0,
+        updated_at INTEGER NOT NULL DEFAULT 0
+    )');
+    $pdo->exec('CREATE INDEX idx_kanai_jobs_conv ON kanai_jobs(conversation_id, status)');
+}
 
 function version_4(PDO $pdo): void
 {

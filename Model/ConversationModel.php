@@ -16,6 +16,65 @@ class ConversationModel extends Base
     public const T_CONVERSATIONS = 'kanai_conversations';
     public const T_MESSAGES = 'kanai_messages';
     public const T_PROPOSALS = 'kanai_proposals';
+    public const T_JOBS = 'kanai_jobs';
+
+    // ── Async jobs ───────────────────────────────────────────────────────
+
+    public function createJob(int $conversationId, int $projectId, int $userId, string $question, string $provider): int
+    {
+        $now = time();
+        $this->db->table(self::T_JOBS)->insert([
+            'conversation_id' => $conversationId,
+            'project_id' => $projectId,
+            'user_id' => $userId,
+            'question' => $question,
+            'provider' => $provider,
+            'status' => 'queued',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        return (int) $this->db->getLastId();
+    }
+
+    public function getJob(int $id): ?array
+    {
+        $row = $this->db->table(self::T_JOBS)->eq('id', $id)->findOne();
+        return $row ?: null;
+    }
+
+    /** Atomically move a queued job to 'running'. Returns false if already taken. */
+    public function claimJob(int $id): bool
+    {
+        $n = $this->db->table(self::T_JOBS)
+            ->eq('id', $id)->eq('status', 'queued')
+            ->update(['status' => 'running', 'updated_at' => time()]);
+        return (bool) $n;
+    }
+
+    public function finishJob(int $id, string $status, string $error = ''): void
+    {
+        $this->db->table(self::T_JOBS)->eq('id', $id)
+            ->update(['status' => $status, 'error' => $error, 'updated_at' => time()]);
+    }
+
+    /** The queued/running job for a conversation, if any (for polling). */
+    public function getActiveJob(int $conversationId): ?array
+    {
+        $row = $this->db->table(self::T_JOBS)
+            ->eq('conversation_id', $conversationId)
+            ->in('status', ['queued', 'running'])
+            ->desc('id')->findOne();
+        return $row ?: null;
+    }
+
+    /** Remove finished jobs older than the given cutoff (housekeeping). */
+    public function purgeFinishedJobs(int $olderThan): void
+    {
+        $this->db->table(self::T_JOBS)
+            ->in('status', ['done', 'error'])
+            ->lt('updated_at', $olderThan)
+            ->remove();
+    }
 
     // ── Conversations ────────────────────────────────────────────────────
 
@@ -92,6 +151,33 @@ class ConversationModel extends Base
         ]);
         $this->touchConversation($conversationId);
         return (int) $this->db->getLastId();
+    }
+
+    /** Conversation messages with an id greater than $afterId (for polling). */
+    public function getMessagesAfter(int $conversationId, int $afterId): array
+    {
+        $rows = $this->db->table(self::T_MESSAGES)
+            ->eq('conversation_id', $conversationId)
+            ->gt('id', $afterId)
+            ->asc('id')
+            ->findAll();
+        foreach ($rows as &$row) {
+            $row['author'] = null;
+            if ($row['role'] === 'user' && ! empty($row['user_id'])) {
+                $user = $this->userModel->getById((int) $row['user_id']);
+                if ($user) {
+                    $row['author'] = $user;
+                }
+            }
+        }
+        unset($row);
+        return $rows;
+    }
+
+    public function getLastMessageId(int $conversationId): int
+    {
+        $id = $this->db->table(self::T_MESSAGES)->eq('conversation_id', $conversationId)->desc('id')->findOneColumn('id');
+        return (int) $id;
     }
 
     /** Number of questions a user asked (across projects) since the given timestamp. */

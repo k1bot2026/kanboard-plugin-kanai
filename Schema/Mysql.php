@@ -4,7 +4,26 @@ namespace Kanboard\Plugin\KanAI\Schema;
 
 use PDO;
 
-const VERSION = 4;
+const VERSION = 5;
+
+function version_5(PDO $pdo): void
+{
+    // Async question processing job.
+    $pdo->exec('CREATE TABLE kanai_jobs (
+        id INT NOT NULL AUTO_INCREMENT,
+        conversation_id INT NOT NULL,
+        project_id INT NOT NULL,
+        user_id INT DEFAULT NULL,
+        question TEXT NOT NULL,
+        provider VARCHAR(20) NOT NULL DEFAULT \'\',
+        status VARCHAR(20) NOT NULL DEFAULT \'queued\',
+        error TEXT,
+        created_at INT NOT NULL DEFAULT 0,
+        updated_at INT NOT NULL DEFAULT 0,
+        PRIMARY KEY (id),
+        INDEX idx_kanai_jobs_conv (conversation_id, status)
+    ) ENGINE=InnoDB CHARSET=utf8mb4');
+}
 
 function version_4(PDO $pdo): void
 {

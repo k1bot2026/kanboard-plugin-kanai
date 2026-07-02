@@ -8,6 +8,28 @@ use RuntimeException;
 
 class AssistantService extends Base
 {
+    /**
+     * Process a queued job (called by the background worker or the inline
+     * fallback). Claims the job, runs the LLM turn, and records the outcome —
+     * so the web request never has to wait for the model.
+     */
+    public function runJob(int $jobId): void
+    {
+        $job = $this->conversationModel->getJob($jobId);
+        if ($job === null || ! $this->conversationModel->claimJob($jobId)) {
+            return; // gone or already taken by another worker
+        }
+        try {
+            $this->ask((int) $job['project_id'], (int) $job['user_id'], (int) $job['conversation_id'], $job['question'], $job['provider']);
+            $this->conversationModel->finishJob($jobId, 'done');
+        } catch (\Throwable $e) {
+            $this->conversationModel->addMessage((int) $job['conversation_id'], (int) $job['project_id'], (int) $job['user_id'], 'user', $job['question']);
+            $this->conversationModel->addMessage((int) $job['conversation_id'], (int) $job['project_id'], (int) $job['user_id'], 'assistant', 'KanAI error: ' . $e->getMessage());
+            $this->conversationModel->finishJob($jobId, 'error', $e->getMessage());
+        }
+        $this->conversationModel->purgeFinishedJobs(time() - 3600);
+    }
+
     public function ask(int $projectId, int $userId, int $conversationId, string $question, string $provider = ''): array
     {
         $settings = $this->settingsModel->getGlobal();

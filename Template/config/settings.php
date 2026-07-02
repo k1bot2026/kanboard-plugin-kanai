@@ -91,6 +91,15 @@
         <p class="form-help"><?= t('Conversations idle longer than this are removed automatically.') ?></p>
     </fieldset>
 
+    <fieldset>
+        <legend>⚡ <?= t('Processing') ?></legend>
+        <?= $this->form->checkbox('kanai_async', t('Process questions in the background (recommended)'), '1', $values['kanai_async'] == '1') ?>
+        <p class="form-help"><?= t('The answer is computed by a background worker and appears when ready, so the request never times out even with large models. Requires the web server to allow spawning a CLI process; if it does not, KanAI falls back to processing in-request.') ?></p>
+        <?= $this->form->label(t('PHP CLI binary (for the background worker)'), 'kanai_php_binary') ?>
+        <?= $this->form->text('kanai_php_binary', $values) ?>
+        <p class="form-help"><?= t('Usually "php". Set a full path if php is not on the web server\'s PATH.') ?></p>
+    </fieldset>
+
     <div class="form-actions">
         <button type="submit" class="btn btn-blue"><?= t('Save') ?></button>
     </div>

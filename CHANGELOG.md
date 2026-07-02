@@ -1,11 +1,34 @@
 # Changelog
 
-## Unreleased
+## 1.7.0 — 2026-07-02
+
+### Added
+- **Background processing (async jobs).** Questions are now handed to a detached
+  CLI worker (`kanai:process-job`) and the browser polls for the answer, so the
+  web request returns in milliseconds and never blocks on the model. This
+  permanently eliminates 504 Gateway Timeouts and makes KanAI work with any
+  model size (7B to 80B+), regardless of how long an answer takes. Verified
+  live end-to-end with a 30s local model: the `ask` request returned in ~7ms
+  while the worker ran out-of-band, and consecutive follow-up questions (the
+  case that previously 504'd) both completed cleanly.
+- New admin settings (Settings → KanAI → Processing): a toggle to enable/disable
+  background processing (default on) and the PHP CLI binary path used to spawn
+  the worker.
+- New `kanai_jobs` table (schema v5) tracking queued/running/done/error jobs,
+  with atomic claim so a job is processed exactly once. Finished jobs are purged
+  automatically after an hour.
+
+### Changed
+- When background processing is unavailable (async disabled, or the web server
+  can't spawn a CLI process), KanAI transparently falls back to answering
+  in-request — releasing the session lock first so the rest of Kanboard stays
+  responsive while the model answers.
 
 ### Docs
 - Deployment note: raise the web server's FastCGI/proxy read timeout above the
   slowest model answer, or synchronous LLM requests can hit a 504 Gateway
-  Timeout (nginx defaults to 60s).
+  Timeout (nginx defaults to 60s). With background processing on (the default)
+  this no longer applies to the request itself.
 
 ## 1.6.0 — 2026-07-02
 

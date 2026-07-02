@@ -95,26 +95,40 @@ class AssistantController extends BaseController
             );
         }
 
-        // Release the session lock so the rest of Kanboard stays responsive while
-        // the (possibly slow) model answers.
+        $settings = $this->settingsModel->getGlobal();
+        $afterId = $this->conversationModel->getLastMessageId($conversationId);
+        $jobId = $this->conversationModel->createJob($conversationId, (int) $project['id'], $userId, $question, $provider);
+        $isAjax = $this->request->isAjax();
+
+        // Async: hand the slow LLM call to a detached background worker and let
+        // the browser poll for the result, so the web request never blocks (no
+        // 504, works with any model size). Falls back to inline processing when
+        // async is disabled or a worker can't be spawned.
+        if ($isAjax && ($settings['kanai_async'] ?? '1') === '1' && $this->spawnWorker($jobId, $settings['kanai_php_binary'] ?? 'php')) {
+            $conv = $this->conversationModel->getConversation($conversationId);
+            $this->response->json([
+                'conversation_id' => $conversationId,
+                'conversation_title' => $conv ? $conv['title'] : '',
+                'pending' => true,
+                'after_id' => $afterId,
+            ]);
+            return;
+        }
+
+        // Inline fallback: release the session lock first so the rest of Kanboard
+        // stays responsive while the model answers.
         if (session_status() === PHP_SESSION_ACTIVE) {
             session_write_close();
         }
-        try {
-            $this->assistantService->ask((int) $project['id'], $userId, $conversationId, $question, $provider);
-        } catch (\Throwable $e) {
-            $this->conversationModel->addMessage($conversationId, (int) $project['id'], $userId, 'user', $question);
-            $this->conversationModel->addMessage($conversationId, (int) $project['id'], $userId, 'assistant', 'KanAI error: ' . $e->getMessage());
-        }
+        $this->assistantService->runJob($jobId);
 
-        if ($this->request->isAjax()) {
+        if ($isAjax) {
             $conv = $this->conversationModel->getConversation($conversationId);
-            $newMessages = array_slice($this->conversationModel->getMessages($conversationId, 200), -2);
             $this->response->json([
                 'conversation_id' => $conversationId,
                 'conversation_title' => $conv ? $conv['title'] : '',
                 'messages_html' => $this->template->render('KanAI:assistant/messages', [
-                    'messages' => $newMessages,
+                    'messages' => $this->conversationModel->getMessagesAfter($conversationId, $afterId),
                     'project' => $project,
                 ]),
                 'proposals_html' => $this->template->render('KanAI:assistant/proposals', [
@@ -125,6 +139,55 @@ class AssistantController extends BaseController
             return;
         }
         $this->response->redirect($this->indexUrl($project, $conversationId));
+    }
+
+    /**
+     * Poll for the result of an in-flight question. Read-only (GET), so no CSRF.
+     */
+    public function poll(): void
+    {
+        $project = $this->getProject();
+        $convId = (int) $this->request->getIntegerParam('conversation_id');
+        $afterId = (int) $this->request->getIntegerParam('after');
+
+        $conv = $this->conversationModel->getConversation($convId);
+        if (! $conv || (int) $conv['project_id'] !== (int) $project['id']) {
+            $this->response->json(['running' => false, 'messages_html' => '', 'proposals_html' => '']);
+            return;
+        }
+        $newMessages = $this->conversationModel->getMessagesAfter($convId, $afterId);
+        $this->response->json([
+            'running' => $this->conversationModel->getActiveJob($convId) !== null,
+            'messages_html' => $newMessages ? $this->template->render('KanAI:assistant/messages', ['messages' => $newMessages, 'project' => $project]) : '',
+            'proposals_html' => $this->template->render('KanAI:assistant/proposals', [
+                'project' => $project,
+                'proposals' => $this->conversationModel->getPendingProposals($convId),
+            ]),
+        ]);
+    }
+
+    /** Spawn a detached CLI worker to process the job. Returns false if it can't. */
+    private function spawnWorker(int $jobId, string $php): bool
+    {
+        if (! function_exists('proc_open')) {
+            return false;
+        }
+        $cli = dirname(__DIR__, 3) . '/cli'; // <kanboard>/plugins/KanAI/Controller -> <kanboard>/cli
+        if (! is_file($cli)) {
+            return false;
+        }
+        $cmd = 'nohup ' . escapeshellarg($php) . ' ' . escapeshellarg($cli) . ' kanai:process-job ' . (int) $jobId . ' > /dev/null 2>&1 &';
+        $proc = @proc_open($cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $pipes);
+        if (! is_resource($proc)) {
+            return false;
+        }
+        foreach ($pipes as $pipe) {
+            if (is_resource($pipe)) {
+                @fclose($pipe);
+            }
+        }
+        @proc_close($proc);
+        return true;
     }
 
     public function deleteConversation(): void
