@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.5.0 — 2026-07-02
+
+### Added
+- Forced JSON mode: the local/OpenAI client now sends
+  `response_format=json_object`, so the strict action envelope parses reliably
+  even on small models. Benchmarked — qwen2.5-coder:7b and gemma3:12b now parse
+  100% first-try (previously the 7B needed the repair retry or failed).
+- `docs/MODEL-GUIDE.md`: measured latency/quality/reliability for 7B/12B/14B on
+  Ollama, plus predictions and hardware requirements up to 80B, with
+  per-use-case recommendations.
+
 ## 1.4.1 — 2026-07-02
 
 ### Fixed
