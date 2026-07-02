@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Docs
+- Deployment note: raise the web server's FastCGI/proxy read timeout above the
+  slowest model answer, or synchronous LLM requests can hit a 504 Gateway
+  Timeout (nginx defaults to 60s).
+
 ## 1.6.0 — 2026-07-02
 
 ### Added

@@ -124,6 +124,26 @@ checkbox appears at all is governed by the application admin's external policy
 (project managers cannot enable external AI the admin has locked down). The
 automatic daily digest is a separate opt-in.
 
+### Deployment note: web-server timeout
+
+KanAI calls the LLM synchronously, so a request can take as long as the model
+needs to answer (tens of seconds on a large local model). Your web server's
+FastCGI/proxy read timeout must be **longer than the slowest answer**, or the
+browser gets a 504 Gateway Timeout. Nginx defaults to 60s — raise it for the PHP
+location:
+
+    location ~ \.php$ {
+        fastcgi_pass ...;
+        fastcgi_read_timeout 300;   # add this
+        fastcgi_send_timeout 300;
+    }
+
+(Apache: `ProxyTimeout`/`Timeout`. PHP-FPM `request_terminate_timeout` and PHP
+`max_execution_time` must also allow it.) KanAI's own timeout to the model is
+`kanai_request_timeout` (Settings → KanAI); keep the web-server timeout at least
+as high. A faster model (see the [model guide](docs/MODEL-GUIDE.md)) keeps
+answers well under any limit.
+
 ### Production note: encryption key
 
 KanAI encrypts external-provider API keys at rest. For production, set a stable
