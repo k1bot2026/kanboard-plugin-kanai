@@ -157,13 +157,24 @@ class AssistantController extends BaseController
         }
         $newMessages = $this->conversationModel->getMessagesAfter($convId, $afterId);
         $this->response->json([
-            'running' => $this->conversationModel->getActiveJob($convId) !== null,
+            'running' => $this->conversationModel->getActiveJob($convId, $this->jobStaleAfter()) !== null,
             'messages_html' => $newMessages ? $this->template->render('KanAI:assistant/messages', ['messages' => $newMessages, 'project' => $project]) : '',
             'proposals_html' => $this->template->render('KanAI:assistant/proposals', [
                 'project' => $project,
                 'proposals' => $this->conversationModel->getPendingProposals($convId),
             ]),
         ]);
+    }
+
+    /**
+     * Seconds after which a queued/running job is considered dead. Twice the
+     * configured LLM timeout (a run may include one repair retry) plus slack,
+     * with a 15-minute floor.
+     */
+    private function jobStaleAfter(): int
+    {
+        $timeout = (int) ($this->settingsModel->getGlobal()['kanai_request_timeout'] ?? 120);
+        return max(900, 2 * $timeout + 60);
     }
 
     /** Spawn a detached CLI worker to process the job. Returns false if it can't. */

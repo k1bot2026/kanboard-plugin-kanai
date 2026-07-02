@@ -57,12 +57,17 @@ class ConversationModel extends Base
             ->update(['status' => $status, 'error' => $error, 'updated_at' => time()]);
     }
 
-    /** The queued/running job for a conversation, if any (for polling). */
-    public function getActiveJob(int $conversationId): ?array
+    /**
+     * The queued/running job for a conversation, if any (for polling).
+     * Jobs not updated within $staleAfter seconds are treated as dead (worker
+     * killed mid-run) so polling can't report "running" forever.
+     */
+    public function getActiveJob(int $conversationId, int $staleAfter = 900): ?array
     {
         $row = $this->db->table(self::T_JOBS)
             ->eq('conversation_id', $conversationId)
             ->in('status', ['queued', 'running'])
+            ->gte('updated_at', time() - $staleAfter)
             ->desc('id')->findOne();
         return $row ?: null;
     }
@@ -73,6 +78,10 @@ class ConversationModel extends Base
         $this->db->table(self::T_JOBS)
             ->in('status', ['done', 'error'])
             ->lt('updated_at', $olderThan)
+            ->remove();
+        // Orphaned queued/running rows (worker died mid-run) — drop after a day.
+        $this->db->table(self::T_JOBS)
+            ->lt('updated_at', time() - 86400)
             ->remove();
     }
 
