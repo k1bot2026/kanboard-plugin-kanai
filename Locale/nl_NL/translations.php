@@ -107,6 +107,7 @@ return array(
     'Request timeout (seconds)' => 'Time-out verzoek (seconden)',
     'History retention (days, 0 = forever)' => 'Bewaartermijn geschiedenis (dagen, 0 = voor altijd)',
     'Processing' => 'Verwerking',
+    'KanAI is thinking…' => 'KanAI denkt na…',
     'Process questions in the background (recommended)' => 'Vragen op de achtergrond verwerken (aanbevolen)',
     'The answer is computed by a background worker and appears when ready, so the request never times out even with large models. Requires the web server to allow spawning a CLI process; if it does not, KanAI falls back to processing in-request.' => 'Het antwoord wordt door een achtergrondproces berekend en verschijnt zodra het klaar is, zodat het verzoek nooit een time-out krijgt, ook niet bij grote modellen. Vereist dat de webserver een CLI-proces mag starten; zo niet, dan verwerkt KanAI de vraag alsnog binnen het verzoek.',
     'PHP CLI binary (for the background worker)' => 'PHP CLI-programma (voor het achtergrondproces)',

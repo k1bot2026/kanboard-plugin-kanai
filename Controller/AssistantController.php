@@ -28,11 +28,17 @@ class AssistantController extends BaseController
             $activeId = (int) $conversations[0]['id'];
         }
 
+        // A question may still be processing in the background (e.g. the page
+        // was reloaded mid-answer): show it as pending and let JS resume polling.
+        $activeJob = $activeId > 0 ? $this->conversationModel->getActiveJob($activeId, $this->jobStaleAfter()) : null;
+
         $this->response->html($this->helper->layout->project('KanAI:assistant/panel', [
             'project' => $project,
             'enabled' => $enabled,
             'conversations' => $conversations,
             'active_id' => $activeId,
+            'active_job' => $activeJob,
+            'last_message_id' => $activeId > 0 ? $this->conversationModel->getLastMessageId($activeId) : 0,
             'messages' => $activeId > 0 ? $this->conversationModel->getMessages($activeId, 200) : [],
             'proposals' => $activeId > 0 ? $this->conversationModel->getPendingProposals($activeId) : [],
             'title' => t('KanAI Assistant'),

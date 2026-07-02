@@ -46,15 +46,27 @@
             </div>
         <?php endif ?>
         <div class="kanai-thread" id="kanai-thread">
-            <?php if (empty($messages)): ?>
+            <?php if (empty($messages) && empty($active_job)): ?>
                 <div class="kanai-welcome">
                     <div class="kanai-welcome-icon">✨</div>
                     <p><?= t('Ask anything about this project, or pick a quick action below. Conversations are shared with everyone on the project.') ?></p>
                 </div>
-            <?php else: ?>
+            <?php elseif (! empty($messages)): ?>
                 <?= $this->render('KanAI:assistant/messages', ['messages' => $messages, 'project' => $project]) ?>
             <?php endif ?>
+            <?php if (! empty($active_job)): ?>
+                <div class="kanai-msg kanai-msg-user kanai-msg-optimistic" id="kanai-pending-question">
+                    <div class="kanai-msg-avatar"><span class="kanai-ai">🧑</span></div>
+                    <div class="kanai-msg-body"><div class="kanai-msg-text"><?= $this->text->e($active_job['question']) ?></div></div>
+                </div>
+            <?php endif ?>
         </div>
+        <?php if (! empty($active_job)): ?>
+            <div class="kanai-thinking" id="kanai-resume"
+                 data-conversation="<?= (int) $active_id ?>" data-after="<?= (int) $last_message_id ?>">
+                <span class="kanai-spinner"></span><span><?= t('KanAI is thinking…') ?></span>
+            </div>
+        <?php endif ?>
 
         <div id="kanai-proposals-region">
             <?= $this->render('KanAI:assistant/proposals', ['project' => $project, 'proposals' => $proposals]) ?>

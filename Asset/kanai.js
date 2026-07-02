@@ -303,11 +303,25 @@
         }
     });
 
-    // On full page load, jump to the newest message.
+    // On full page load, jump to the newest message. If a question is still
+    // processing in the background (page was reloaded mid-answer), resume
+    // polling so the answer appears without a manual refresh.
     window.addEventListener('load', function () {
         var msgs = document.querySelectorAll('#kanai-thread .kanai-msg');
         if (msgs.length) {
             msgs[msgs.length - 1].scrollIntoView({ block: 'center' });
+        }
+        var resume = document.getElementById('kanai-resume');
+        var form = q('.kanai-ask');
+        if (resume && form && window.fetch) {
+            setBusy(true); // existing .kanai-thinking box is reused, buttons disabled
+            pollForAnswer(
+                form,
+                resume.dataset.conversation,
+                parseInt(resume.dataset.after || '0', 10),
+                document.getElementById('kanai-pending-question'),
+                0
+            );
         }
     });
 })();
