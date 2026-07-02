@@ -74,7 +74,7 @@ class Plugin extends Base
     public function getPluginName(): string { return 'KanAI'; }
     public function getPluginDescription(): string { return 'AI assistant & project Q&A (RAG) for Kanboard — local LLM first, optional external providers'; }
     public function getPluginAuthor(): string { return 'k1bot2026'; }
-    public function getPluginVersion(): string { return '1.4.0'; }
+    public function getPluginVersion(): string { return '1.4.1'; }
     public function getCompatibleVersion(): string { return '>=1.2.46'; }
     public function getPluginHomepage(): string { return 'https://github.com/k1bot2026/kanboard-plugin-kanai'; }
 }

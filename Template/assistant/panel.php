@@ -76,7 +76,7 @@
               action="<?= $this->url->href('AssistantController', 'ask', ['project_id' => $project['id'], 'plugin' => 'KanAI']) ?>">
             <?= $this->form->csrf() ?>
             <input type="hidden" name="conversation_id" value="<?= (int) $active_id ?>">
-            <?= $this->form->textarea('question', [], [], ['placeholder' => t('Message KanAI…'), 'rows' => 3, 'id' => 'kanai-input']) ?>
+            <?= $this->form->textarea('question', [], [], ['placeholder="' . $this->text->e(t('Message KanAI…')) . '"', 'rows="3"']) ?>
             <div class="kanai-ask-actions">
                 <button type="submit" class="btn btn-blue"><?= t('Send') ?></button>
                 <?php if ($active_id > 0): ?>

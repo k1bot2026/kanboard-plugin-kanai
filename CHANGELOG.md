@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.4.1 — 2026-07-02
+
+### Fixed
+- Enter-to-send and the composer placeholder did not work: Kanboard's form
+  helper expects attributes as raw strings and forces its own element id, so
+  the textarea never got the id/placeholder the JS and template assumed. The
+  JS now targets `.kanai-ask textarea`; verified in a real browser.
+
+### Docs
+- Full README rework with real screenshots (chat, proposals & approval, admin
+  settings with connection test, project settings), feature/action tables,
+  security model, and configuration reference.
+
 ## 1.4.0 — 2026-07-02
 
 ### Added

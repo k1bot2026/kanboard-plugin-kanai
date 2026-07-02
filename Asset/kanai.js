@@ -96,7 +96,7 @@
                 list.insertBefore(li, list.firstChild);
             }
         }
-        var input = q('#kanai-input');
+        var input = q('.kanai-ask textarea');
         if (input) { input.value = ''; }
         var msgs = document.querySelectorAll('#kanai-thread .kanai-msg');
         if (msgs.length) {
@@ -122,7 +122,7 @@
 
         var optimistic = null;
         if (isAsk) {
-            var input = q('#kanai-input');
+            var input = q('.kanai-ask textarea');
             var text = input ? input.value.trim() : '';
             if (text === '') { return; }
             optimistic = appendOptimisticUserBubble(text);
@@ -154,7 +154,7 @@
     // Enter sends, Shift+Enter inserts a newline (chat convention).
     document.addEventListener('keydown', function (e) {
         var el = e.target;
-        if (el && el.id === 'kanai-input' && e.key === 'Enter' && ! e.shiftKey) {
+        if (el && el.matches && el.matches('.kanai-ask textarea') && e.key === 'Enter' && ! e.shiftKey) {
             e.preventDefault();
             var form = el.closest('form');
             if (form && typeof form.requestSubmit === 'function') {
