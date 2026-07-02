@@ -14,11 +14,12 @@ class LlmClientFactory extends Base
 
         // Throws RuntimeException if AI is off for the project or an external
         // provider is requested without both flags set. Enforced here, server-side.
+        $policy = $this->settingsModel->getExternalPolicy();
         $provider = GatingPolicy::resolveProvider(
             $this->settingsModel->getProjectEnabled($projectId),
             $requested,
-            $this->settingsModel->isExternalEnabled(),
-            $this->settingsModel->getProjectExternalOptIn($projectId)
+            GatingPolicy::externalEnabled($policy),
+            GatingPolicy::effectiveOptIn($policy, $this->settingsModel->getProjectExternalOptIn($projectId))
         );
 
         $maxOutput = (int) $settings['kanai_max_output_tokens'];
@@ -45,11 +46,12 @@ class LlmClientFactory extends Base
     {
         $settings = $this->settingsModel->getGlobal();
         $requested = $requestedProvider !== '' ? $requestedProvider : $settings['kanai_default_provider'];
+        $policy = $this->settingsModel->getExternalPolicy();
         $provider = GatingPolicy::resolveProvider(
             $this->settingsModel->getProjectEnabled($projectId),
             $requested,
-            $this->settingsModel->isExternalEnabled(),
-            $this->settingsModel->getProjectExternalOptIn($projectId)
+            GatingPolicy::externalEnabled($policy),
+            GatingPolicy::effectiveOptIn($policy, $this->settingsModel->getProjectExternalOptIn($projectId))
         );
         $modelKey = ['anthropic' => 'kanai_anthropic_model', 'openai' => 'kanai_openai_model'];
         $model = $settings[$modelKey[$provider] ?? 'kanai_local_model'];

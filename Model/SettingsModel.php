@@ -51,8 +51,11 @@ class SettingsModel extends Base
     public function saveGlobal(array $values): void
     {
         $crypto = $this->crypto();
+        $policy = \Kanboard\Plugin\KanAI\Settings\GatingPolicy::normalizePolicy($values['kanai_external_policy'] ?? 'disabled');
         $save = [
-            'kanai_external_enabled' => empty($values['kanai_external_enabled']) ? '0' : '1',
+            'kanai_external_policy' => $policy,
+            // Keep the legacy boolean in sync for any external reader.
+            'kanai_external_enabled' => $policy === \Kanboard\Plugin\KanAI\Settings\GatingPolicy::POLICY_DISABLED ? '0' : '1',
             'kanai_default_provider' => in_array($values['kanai_default_provider'] ?? 'local', ['local', 'openai', 'anthropic'], true)
                 ? $values['kanai_default_provider'] : 'local',
             'kanai_local_base_url' => trim($values['kanai_local_base_url'] ?? self::DEFAULTS['kanai_local_base_url']),
@@ -78,9 +81,24 @@ class SettingsModel extends Base
         $this->configModel->save($save);
     }
 
+    /**
+     * Application-admin external-AI policy: disabled | project_optin | all_projects.
+     * Falls back to the legacy boolean kill switch for pre-1.6 installs.
+     */
+    public function getExternalPolicy(): string
+    {
+        $policy = $this->configModel->get('kanai_external_policy', '');
+        if ($policy === '') {
+            return $this->configModel->get('kanai_external_enabled', '0') === '1'
+                ? \Kanboard\Plugin\KanAI\Settings\GatingPolicy::POLICY_PROJECT_OPTIN
+                : \Kanboard\Plugin\KanAI\Settings\GatingPolicy::POLICY_DISABLED;
+        }
+        return \Kanboard\Plugin\KanAI\Settings\GatingPolicy::normalizePolicy($policy);
+    }
+
     public function isExternalEnabled(): bool
     {
-        return $this->configModel->get('kanai_external_enabled', '0') === '1';
+        return \Kanboard\Plugin\KanAI\Settings\GatingPolicy::externalEnabled($this->getExternalPolicy());
     }
 
     public function getProjectEnabled(int $projectId): bool
@@ -100,6 +118,12 @@ class SettingsModel extends Base
 
     public function saveProject(int $projectId, bool $enabled, bool $externalOptIn, bool $autoDigest = false): void
     {
+        // A project manager may only change the external opt-in when the admin
+        // policy allows it; otherwise the stored value is preserved (the manager
+        // cannot enable external AI the application admin has locked down).
+        if (! \Kanboard\Plugin\KanAI\Settings\GatingPolicy::projectMayOptIn($this->getExternalPolicy())) {
+            $externalOptIn = $this->getProjectExternalOptIn($projectId);
+        }
         $this->projectMetadataModel->save($projectId, [
             'kanai_enabled' => $enabled ? '1' : '0',
             'kanai_external_opt_in' => $externalOptIn ? '1' : '0',

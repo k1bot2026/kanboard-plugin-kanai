@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.6.0 — 2026-07-02
+
+### Added
+- Admin-controlled external-AI policy. The application administrator sets one of
+  three policies (Settings → KanAI): **disabled** (local only), **per-project
+  opt-in** (project managers may enable external AI per project), or **enabled
+  for all projects** (forced on). Project managers can only toggle the
+  per-project opt-in when the policy allows it — they cannot enable external AI
+  the application admin has locked down, and the restriction is enforced
+  server-side (a crafted request is ignored). Replaces the previous global
+  on/off kill switch; existing installs migrate automatically (on → per-project
+  opt-in, off → disabled).
+
 ## 1.5.0 — 2026-07-02
 
 ### Added

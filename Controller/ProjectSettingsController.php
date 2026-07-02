@@ -14,7 +14,7 @@ class ProjectSettingsController extends BaseController
             'enabled' => $this->settingsModel->getProjectEnabled($project['id']),
             'external_opt_in' => $this->settingsModel->getProjectExternalOptIn($project['id']),
             'auto_digest' => $this->settingsModel->getProjectAutoDigest($project['id']),
-            'external_globally_enabled' => $this->settingsModel->isExternalEnabled(),
+            'external_policy' => $this->settingsModel->getExternalPolicy(),
             'title' => t('KanAI Settings'),
         ]));
     }

@@ -59,9 +59,12 @@ review (rendered as "KanAI (automatic)" 🤖). Schedule it from cron:
 For Docker: `docker exec <container> php /var/www/app/cli kanai:digest`.
 
 ### 🔒 Security model
-- **Local-first**: the default provider is your own OpenAI-compatible server;
-  external providers are OFF until an admin enables them *and* each project
-  opts in — enforced server-side, not in the UI.
+- **Local-first**: the default provider is your own OpenAI-compatible server.
+- **Admin-controlled external policy**: only the *application* administrator
+  (not project managers) sets whether external AI is allowed — `disabled`
+  (local only), `project_optin` (project managers may enable it per project), or
+  `all_projects` (forced on). When disabled or forced, project managers cannot
+  change it; the policy is enforced server-side, not just hidden in the UI.
 - **Human approval gate**: no model output ever changes project state without
   an explicit click; project content is treated as untrusted input
   (prompt-injection framing in the system prompt).
@@ -105,7 +108,7 @@ server — discovers the available models as suggestions for the model field.
 | Setting | Default | |
 |---|---|---|
 | Base URL | `http://localhost:11434/v1` | any OpenAI-compatible server; use `http://host.docker.internal:11434/v1` from Docker |
-| External providers | off | global kill switch for OpenAI/Anthropic |
+| External AI policy | disabled | `disabled` / `project_optin` / `all_projects` — app-admin only |
 | Max context tokens | 8000 | how much project data goes into a question |
 | Max output tokens | 1024 | answer length budget |
 | Request timeout | 120s | local models can take a while |
@@ -116,9 +119,10 @@ server — discovers the available models as suggestions for the model field.
 
 ![Project settings](screenshots/project-settings.png)
 
-KanAI is off per project until enabled here. External providers additionally
-require the per-project opt-in, and the automatic daily digest is a separate
-opt-in.
+KanAI is off per project until enabled here. Whether the "allow external AI"
+checkbox appears at all is governed by the application admin's external policy
+(project managers cannot enable external AI the admin has locked down). The
+automatic daily digest is a separate opt-in.
 
 ### Production note: encryption key
 

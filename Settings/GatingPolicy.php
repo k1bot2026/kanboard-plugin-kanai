@@ -14,6 +14,41 @@ class GatingPolicy
     public const LOCAL = 'local';
     public const EXTERNAL = ['openai', 'anthropic'];
 
+    // Application-admin external-AI policy (project managers cannot change it).
+    public const POLICY_DISABLED = 'disabled';        // no external AI anywhere
+    public const POLICY_PROJECT_OPTIN = 'project_optin'; // project managers may opt in
+    public const POLICY_ALL_PROJECTS = 'all_projects';   // forced on for every project
+    public const POLICIES = [self::POLICY_DISABLED, self::POLICY_PROJECT_OPTIN, self::POLICY_ALL_PROJECTS];
+
+    public static function normalizePolicy(string $policy): string
+    {
+        return in_array($policy, self::POLICIES, true) ? $policy : self::POLICY_DISABLED;
+    }
+
+    /** Is external AI available at all under this admin policy? */
+    public static function externalEnabled(string $policy): bool
+    {
+        return $policy !== self::POLICY_DISABLED;
+    }
+
+    /** Whether project managers may set the per-project opt-in under this policy. */
+    public static function projectMayOptIn(string $policy): bool
+    {
+        return $policy === self::POLICY_PROJECT_OPTIN;
+    }
+
+    /** The effective per-project opt-in after applying the admin policy. */
+    public static function effectiveOptIn(string $policy, bool $projectOptIn): bool
+    {
+        if ($policy === self::POLICY_ALL_PROJECTS) {
+            return true;
+        }
+        if ($policy === self::POLICY_PROJECT_OPTIN) {
+            return $projectOptIn;
+        }
+        return false;
+    }
+
     public static function isExternalProvider(string $provider): bool
     {
         return in_array($provider, self::EXTERNAL, true);

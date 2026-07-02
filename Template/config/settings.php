@@ -26,8 +26,14 @@
 
     <fieldset>
         <legend>☁️ <?= t('External providers') ?></legend>
-        <?= $this->form->checkbox('kanai_external_enabled', t('Allow external AI providers (global kill switch)'), '1', $values['kanai_external_enabled'] == '1') ?>
-        <p class="form-help"><?= t('When off, only the local LLM is used — no project data leaves this server. Projects must additionally opt in individually.') ?></p>
+        <p class="form-help"><?= t('Only the application administrator sets this policy. Project managers cannot override it.') ?></p>
+        <?= $this->form->label(t('External AI policy'), 'kanai_external_policy') ?>
+        <?= $this->form->select('kanai_external_policy', [
+            'disabled' => t('Disabled — no external AI (local only)'),
+            'project_optin' => t('Per-project opt-in — project managers may enable it'),
+            'all_projects' => t('Enabled for all projects — project managers cannot change it'),
+        ], $values) ?>
+        <p class="form-help"><?= t('When disabled, no project data ever leaves this server, and project managers cannot turn external AI on.') ?></p>
 
         <?= $this->form->label(t('Default provider'), 'kanai_default_provider') ?>
         <?= $this->form->select('kanai_default_provider', ['local' => t('Local LLM'), 'openai' => 'OpenAI', 'anthropic' => 'Anthropic (Claude)'], $values) ?>
