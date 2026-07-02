@@ -114,6 +114,14 @@
         if (! isAsk && ! isSkill) {
             return;
         }
+        // One question at a time: while an answer is pending, a second submit
+        // (e.g. Enter — requestSubmit bypasses the disabled button) would race
+        // the polling loops and duplicate rendered messages.
+        var root = q('.kanai');
+        if (root && root.classList.contains('kanai-busy')) {
+            e.preventDefault();
+            return;
+        }
         if (! window.fetch) {
             setBusy(true); // classic submit still shows the indicator
             return;
