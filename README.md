@@ -87,6 +87,11 @@ automatically.
 LLM endpoint (e.g. [Ollama](https://ollama.com) with a ~7B model such as
 `qwen2.5-coder:7b` — answers in seconds; larger models give richer answers).
 
+**Which model?** See the [model guide](docs/MODEL-GUIDE.md) for measured
+latency/quality across 7B–14B and predictions up to 80B. Short version:
+`gemma3:12b` is the best quality/speed balance for live chat; a fast 7–8B model
+for snappy Q&A; and as large as your hardware allows for the background digest.
+
 ## Configure
 
 ### Global (Settings → KanAI, admins)
