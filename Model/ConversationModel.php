@@ -72,6 +72,19 @@ class ConversationModel extends Base
         return $row ?: null;
     }
 
+    /**
+     * Queued/running jobs for a user. Counts toward the rate limit so rapid
+     * enqueueing can't bypass it before workers write the user messages.
+     */
+    public function countActiveUserJobs(int $userId, int $staleAfter = 900): int
+    {
+        return (int) $this->db->table(self::T_JOBS)
+            ->eq('user_id', $userId)
+            ->in('status', ['queued', 'running'])
+            ->gte('updated_at', time() - $staleAfter)
+            ->count();
+    }
+
     /** Remove finished jobs older than the given cutoff (housekeeping). */
     public function purgeFinishedJobs(int $olderThan): void
     {

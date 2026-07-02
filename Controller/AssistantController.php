@@ -67,9 +67,15 @@ class AssistantController extends BaseController
             return;
         }
 
-        // Rate limit: cap questions per user per hour (0 = unlimited).
+        // Rate limit: cap questions per user per hour (0 = unlimited). Pending
+        // jobs count too — their user messages aren't written until the worker
+        // runs, so counting messages alone would let rapid enqueues slip past.
         $limit = (int) ($this->settingsModel->getGlobal()['kanai_rate_limit_per_hour'] ?? 0);
-        if ($limit > 0 && $this->conversationModel->countRecentUserMessages($userId, time() - 3600) >= $limit) {
+        $used = $limit > 0
+            ? $this->conversationModel->countRecentUserMessages($userId, time() - 3600)
+                + $this->conversationModel->countActiveUserJobs($userId, $this->jobStaleAfter())
+            : 0;
+        if ($limit > 0 && $used >= $limit) {
             $message = t('Rate limit reached (%d questions per hour). Try again later.', $limit);
             if ($this->request->isAjax()) {
                 $this->response->json(['error' => $message], 429);
