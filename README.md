@@ -10,6 +10,12 @@ use external providers (Anthropic Claude, OpenAI). An administrator can switch
 all external AI off with a single, server-enforced kill switch — by default no
 project data ever leaves your server.
 
+Questions are processed **in the background**: the page responds instantly, a
+thinking indicator polls for the result, and the answer appears when ready.
+That means **no web-server timeouts and no practical limit on model size** —
+a 7B model that answers in 3 seconds and a 70B model that takes 5 minutes both
+just work.
+
 ![KanAI assistant chat](screenshots/assistant-chat.png)
 
 ## Features
@@ -48,6 +54,18 @@ One-click presets above the composer:
 📋 Project summary · ⏭️ What's next? · 📊 Board health · 📝 Stand-up notes ·
 🧹 Cleanup suggestions · 🚧 Risks & blockers · 🧑‍🤝‍🧑 Workload · 🗂️ Organize ·
 ✨ Enrich tasks · 🙋 Help & explain
+
+### 🚀 Background processing (works with any model size)
+Asking a question enqueues a job and spawns a detached CLI worker; the browser
+polls until the answer is ready. The web request itself returns in
+milliseconds, so slow models can't cause 504 Gateway Timeouts and Kanboard
+stays fully responsive while the model thinks. Reloading the page mid-answer
+(or opening the shared conversation as another member) shows the pending
+question and picks up polling — the answer appears without a manual refresh.
+If the web server can't spawn processes, KanAI transparently falls back to
+in-request processing.
+
+![Background processing](screenshots/async-thinking.png)
 
 ### 🕖 Automatic daily digest (optional)
 Projects can opt in to an autonomous digest: KanAI starts a fresh conversation
@@ -111,9 +129,11 @@ server — discovers the available models as suggestions for the model field.
 | External AI policy | disabled | `disabled` / `project_optin` / `all_projects` — app-admin only |
 | Max context tokens | 8000 | how much project data goes into a question |
 | Max output tokens | 1024 | answer length budget |
-| Request timeout | 120s | local models can take a while |
-| Rate limit | 30/user/hour | 0 = unlimited |
+| Request timeout | 120s | KanAI's own timeout to the model (the browser never waits on it) |
+| Rate limit | 30/user/hour | 0 = unlimited; pending background jobs count too |
 | History retention | forever | auto-purge idle conversations after N days |
+| Background processing | on | answers computed by a detached worker; browser polls |
+| PHP CLI binary | `php` | full path if `php` is not on the web server's PATH |
 
 ### Per project (project sidebar → KanAI Settings, managers)
 
@@ -124,25 +144,20 @@ checkbox appears at all is governed by the application admin's external policy
 (project managers cannot enable external AI the admin has locked down). The
 automatic daily digest is a separate opt-in.
 
-### Deployment note: web-server timeout
+### Deployment note: background worker
 
-KanAI calls the LLM synchronously, so a request can take as long as the model
-needs to answer (tens of seconds on a large local model). Your web server's
-FastCGI/proxy read timeout must be **longer than the slowest answer**, or the
-browser gets a 504 Gateway Timeout. Nginx defaults to 60s — raise it for the PHP
-location:
+With background processing on (the default) the web request never waits for
+the model, so **web-server timeouts don't apply** — no nginx/Apache tuning
+needed. The worker is a detached `php cli kanai:process-job <id>` process; the
+only requirements are that PHP's `proc_open` is not disabled and the `php`
+binary is reachable (set its full path in Settings → KanAI if not).
 
-    location ~ \.php$ {
-        fastcgi_pass ...;
-        fastcgi_read_timeout 300;   # add this
-        fastcgi_send_timeout 300;
-    }
-
-(Apache: `ProxyTimeout`/`Timeout`. PHP-FPM `request_terminate_timeout` and PHP
-`max_execution_time` must also allow it.) KanAI's own timeout to the model is
-`kanai_request_timeout` (Settings → KanAI); keep the web-server timeout at least
-as high. A faster model (see the [model guide](docs/MODEL-GUIDE.md)) keeps
-answers well under any limit.
+If your hosting can't spawn processes, KanAI automatically answers in-request
+instead. Only in that fallback mode does the classic advice apply: raise the
+web server's FastCGI/proxy read timeout above the slowest model answer (nginx
+`fastcgi_read_timeout`, Apache `ProxyTimeout`, PHP-FPM
+`request_terminate_timeout`), or pick a faster model (see the
+[model guide](docs/MODEL-GUIDE.md)).
 
 ### Production note: encryption key
 
@@ -161,9 +176,14 @@ project's most relevant tasks, comments and subtasks (keyword + recency
 scoring, capped by the token budget), wraps them in a clearly-delimited
 data block, and asks the model for a strict JSON envelope
 (`{"answer": …, "proposals": […]}`). Proposals are validated against the action
-whitelist, stored, and only applied after human approval. The session lock is
-released during the LLM call so Kanboard stays responsive while the model
-thinks.
+whitelist, stored, and only applied after human approval.
+
+Under the hood, `ask` creates a row in `kanai_jobs` and spawns a detached
+worker (`php cli kanai:process-job <id>`); the worker claims the job
+atomically (each job runs exactly once), calls the model, writes the messages,
+and marks the job done. The browser polls a lightweight read-only endpoint
+until new messages appear. Stale jobs (a worker killed mid-run) age out
+automatically, and finished jobs are purged after an hour.
 
 ## Development
 

@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.7.1 — 2026-07-03
+
+QA pass over the async feature; all fixes verified live in a real browser.
+
+### Fixed
+- **Reload during a pending answer.** Reloading the page (or opening the shared
+  conversation as another member) while a question was processing showed
+  neither the question nor a spinner, and the answer never appeared without
+  another manual refresh. The panel now renders the pending question and
+  thinking indicator server-side and resumes polling on load.
+- **Stale jobs.** A worker killed mid-run (container restart, OOM) left its job
+  on `running` forever, so polling kept reporting activity. Active-job lookups
+  now ignore jobs not updated within a stale window (2× the LLM timeout,
+  15-minute floor); orphaned rows are purged after a day.
+- **Double submit while busy.** Enter-to-send could fire a second question
+  while one was already pending (bypassing the disabled Send button), which
+  could duplicate rendered messages. Submits are ignored while busy.
+- **Rate limit and queued jobs.** Pending background jobs now count toward the
+  per-user hourly rate limit (their user messages aren't written until the
+  worker runs, so rapid enqueues could previously slip past it).
+
+### Docs
+- README rewritten for the async architecture: background-processing feature
+  section, updated settings table, deployment note now covers the worker
+  requirements instead of web-server timeouts, refreshed screenshots
+  (including the new pending/thinking state).
+
 ## 1.7.0 — 2026-07-02
 
 ### Added
