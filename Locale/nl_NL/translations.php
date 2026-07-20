@@ -91,6 +91,8 @@ return array(
     'Local LLM (default)' => 'Lokaal LLM (standaard)',
     'Base URL (OpenAI-compatible)' => 'Basis-URL (OpenAI-compatibel)',
     'Model' => 'Model',
+    'API key (optional)' => 'API-sleutel (optioneel)',
+    'Leave blank for a server that needs no authentication (Ollama, llama.cpp). Set a key for a server that requires one, e.g. LocalAI, or a proxy in front of it.' => 'Laat leeg voor een server die geen authenticatie vereist (Ollama, llama.cpp). Stel een sleutel in voor een server die er wel een nodig heeft, bijv. LocalAI, of een proxy ervoor.',
     'External providers' => 'Externe providers',
     'Allow external AI providers (global kill switch)' => 'Externe AI-providers toestaan (globale noodschakelaar)',
     'When off, only the local LLM is used — no project data leaves this server.' => 'Indien uit wordt alleen het lokale LLM gebruikt — er verlaten geen projectgegevens deze server.',

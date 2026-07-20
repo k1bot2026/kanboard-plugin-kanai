@@ -14,6 +14,7 @@ class ConfigController extends BaseController
             'values' => empty($values) ? $settings : $values,
             'openai_key_mask' => $crypto->mask($settings['kanai_openai_key']),
             'anthropic_key_mask' => $crypto->mask($settings['kanai_anthropic_key']),
+            'local_key_mask' => $crypto->mask($settings['kanai_local_api_key']),
             'title' => t('KanAI Settings'),
         ]));
     }
@@ -41,7 +42,16 @@ class ConfigController extends BaseController
             switch ($provider) {
                 case 'local':
                     $base = rtrim(trim($values['base_url'] ?? '') !== '' ? trim($values['base_url']) : $settings['kanai_local_base_url'], '/');
-                    $json = $this->httpJson('GET', $base . '/models');
+                    // Use the key typed in the form when present, else the saved one,
+                    // so a server that requires auth can be tested before saving.
+                    $key = trim($values['api_key'] ?? '') !== '' ? trim($values['api_key']) : $settings['kanai_local_api_key'];
+                    $headers = $key !== '' ? ['Authorization: Bearer ' . $key] : [];
+                    $json = $this->httpJson('GET', $base . '/models', null, $headers);
+                    if (isset($json['error'])) {
+                        $msg = is_array($json['error']) ? ($json['error']['message'] ?? 'error') : (string) $json['error'];
+                        $this->response->json(['ok' => false, 'detail' => (string) $msg]);
+                        return;
+                    }
                     $models = [];
                     foreach (($json['data'] ?? []) as $m) {
                         if (! empty($m['id'])) {

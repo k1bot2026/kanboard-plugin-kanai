@@ -44,9 +44,14 @@ class SettingsModel extends Base
         foreach (self::DEFAULTS as $k => $default) {
             $out[$k] = $this->configModel->get($k, $default);
         }
+        // The external-AI policy lives outside DEFAULTS (it has a legacy-boolean
+        // fallback), so surface it explicitly — otherwise the admin config select
+        // has no stored value to bind to and always renders as "Disabled".
+        $out['kanai_external_policy'] = $this->getExternalPolicy();
         $crypto = $this->crypto();
         $out['kanai_openai_key'] = $crypto->decrypt($this->configModel->get('kanai_openai_key', ''));
         $out['kanai_anthropic_key'] = $crypto->decrypt($this->configModel->get('kanai_anthropic_key', ''));
+        $out['kanai_local_api_key'] = $crypto->decrypt($this->configModel->get('kanai_local_api_key', ''));
         return $out;
     }
 
@@ -76,7 +81,7 @@ class SettingsModel extends Base
         // saved key is shown only as a masked hint, never pre-filled into the
         // input). So any non-empty submitted value is a genuine new key. This
         // avoids depending on a fragile multibyte mask sentinel.
-        foreach (['kanai_openai_key', 'kanai_anthropic_key'] as $field) {
+        foreach (['kanai_openai_key', 'kanai_anthropic_key', 'kanai_local_api_key'] as $field) {
             $new = trim($values[$field] ?? '');
             if ($new !== '') {
                 $save[$field] = $crypto->encrypt($new);

@@ -18,8 +18,12 @@
         <datalist id="kanai-local-models"></datalist>
         <p class="form-help"><?= t('Tip: press "Test connection" to discover the models available on the server.') ?></p>
 
+        <?= $this->form->label(t('API key (optional)'), 'kanai_local_api_key') ?>
+        <?= $this->form->password('kanai_local_api_key', []) ?>
+        <p class="form-help"><?= $local_key_mask !== '' ? t('Saved: %s (leave blank to keep)', $local_key_mask) : t('Leave blank for a server that needs no authentication (Ollama, llama.cpp). Set a key for a server that requires one, e.g. LocalAI, or a proxy in front of it.') ?></p>
+
         <p>
-            <button type="button" class="btn kanai-test-btn" data-provider="local"><?= t('Test connection') ?></button>
+            <button type="button" class="btn kanai-test-btn" data-provider="local" data-key-field="kanai_local_api_key"><?= t('Test connection') ?></button>
             <span class="kanai-test-result" id="kanai-test-result-local"></span>
         </p>
     </fieldset>

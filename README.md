@@ -126,6 +126,7 @@ server — discovers the available models as suggestions for the model field.
 | Setting | Default | |
 |---|---|---|
 | Base URL | `http://localhost:11434/v1` | any OpenAI-compatible server; use `http://host.docker.internal:11434/v1` from Docker |
+| API key (local) | _(blank)_ | optional; set it for a local server that needs auth (LocalAI, a reverse proxy). Blank = no auth (Ollama, llama.cpp) |
 | External AI policy | disabled | `disabled` / `project_optin` / `all_projects` — app-admin only |
 | Max context tokens | 8000 | how much project data goes into a question |
 | Max output tokens | 1024 | answer length budget |

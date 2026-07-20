@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.8.0 — 2026-07-20
+
+### Fixed
+- **External-AI policy reset to “Disabled” (#1).** The admin *External providers*
+  policy was saved correctly but never displayed: `SettingsModel::getGlobal()`
+  built its values only from the defaults map, which has no
+  `kanai_external_policy` entry, so the config dropdown always fell back to its
+  first option (“Disabled”). Re-saving the settings then wrote that back,
+  silently turning external AI off again even after a project had opted in. The
+  resolved policy (with the legacy-boolean fallback) is now included in the form
+  values, so the select reflects what is actually stored.
+
+### Added
+- **API key for the local LLM (#2).** The local (OpenAI-compatible) provider now
+  accepts an optional API key, so KanAI can talk to a local model server that
+  requires authentication — LocalAI, open-webui, or any Ollama/vLLM endpoint
+  reached over the internet through a reverse proxy. The key is stored encrypted
+  (AES-256-GCM, same as the OpenAI/Anthropic keys), shown only as a masked hint,
+  and sent as an `Authorization: Bearer` header. Leave it blank for servers that
+  need no auth (Ollama, llama.cpp) — behaviour is unchanged there. The “Test
+  connection” button for the local server now authenticates with the key too and
+  surfaces an auth error instead of reporting “0 models”.
+
 ## 1.7.1 — 2026-07-03
 
 QA pass over the async feature; all fixes verified live in a real browser.
