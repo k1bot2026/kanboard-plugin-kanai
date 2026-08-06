@@ -119,4 +119,20 @@ return array(
     'Enable KanAI for this project' => 'KanAI inschakelen voor dit project',
     'Allow external AI providers for this project' => 'Externe AI-providers toestaan voor dit project',
     'External providers are globally disabled by the administrator; only the local LLM will be used regardless of this setting.' => 'Externe providers zijn globaal uitgeschakeld door de beheerder; ongeacht deze instelling wordt alleen het lokale LLM gebruikt.',
+
+    // Availability (enable-in-all-projects policy)
+    'Availability' => 'Beschikbaarheid',
+    'Enable KanAI in projects' => 'KanAI inschakelen in projecten',
+    'Per project — a project manager turns it on for each project' => 'Per project — een projectbeheerder schakelt het per project in',
+    'All projects — enabled across the whole Kanboard instance' => 'Alle projecten — ingeschakeld voor de hele Kanboard-installatie',
+    '“Per project” keeps KanAI off until enabled in each project’s settings (best for larger installs). “All projects” makes it available everywhere without per-project setup.' => '“Per project” houdt KanAI uit totdat het in de instellingen van elk project wordt ingeschakeld (het beste voor grotere installaties). “Alle projecten” maakt het overal beschikbaar zonder configuratie per project.',
+    'KanAI is enabled for all projects by the administrator.' => 'KanAI is door de beheerder voor alle projecten ingeschakeld.',
+
+    // Customizable quick actions
+    'Quick actions' => 'Snelacties',
+    'The one-click preset buttons shown in the assistant. Edit the label and the instruction sent to the model. Tip: for non-English projects, write the instruction in your language or add “Answer in <language>.” Remove every row and save to restore the built-in defaults.' => 'De één-klik-knoppen in de assistent. Pas het label en de instructie aan die naar het model worden gestuurd. Tip: schrijf voor niet-Engelse projecten de instructie in uw taal of voeg “Antwoord in <taal>.” toe. Verwijder alle rijen en sla op om de ingebouwde standaardwaarden te herstellen.',
+    'Label (e.g. 📋 Project summary)' => 'Label (bijv. 📋 Projectsamenvatting)',
+    'Instruction sent to the model' => 'Instructie die naar het model wordt gestuurd',
+    'Add quick action' => 'Snelactie toevoegen',
+    'Remove' => 'Verwijderen',
 );

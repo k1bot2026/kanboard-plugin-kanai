@@ -20,9 +20,31 @@ class GatingPolicy
     public const POLICY_ALL_PROJECTS = 'all_projects';   // forced on for every project
     public const POLICIES = [self::POLICY_DISABLED, self::POLICY_PROJECT_OPTIN, self::POLICY_ALL_PROJECTS];
 
+    // Application-admin enablement policy: where KanAI itself is available.
+    // Default keeps the per-project restriction (managers turn it on), which is
+    // what larger installs want; ALL_PROJECTS turns it on instance-wide.
+    public const ENABLE_PER_PROJECT = 'per_project';
+    public const ENABLE_ALL_PROJECTS = 'all_projects';
+    public const ENABLE_POLICIES = [self::ENABLE_PER_PROJECT, self::ENABLE_ALL_PROJECTS];
+
     public static function normalizePolicy(string $policy): string
     {
         return in_array($policy, self::POLICIES, true) ? $policy : self::POLICY_DISABLED;
+    }
+
+    public static function normalizeEnablePolicy(string $policy): string
+    {
+        return in_array($policy, self::ENABLE_POLICIES, true) ? $policy : self::ENABLE_PER_PROJECT;
+    }
+
+    /**
+     * Whether KanAI is enabled for a project, given the admin enablement policy
+     * and the project's own opt-in flag. ALL_PROJECTS overrides the per-project
+     * flag; PER_PROJECT defers to it.
+     */
+    public static function projectEnabled(string $enablePolicy, bool $projectFlag): bool
+    {
+        return $enablePolicy === self::ENABLE_ALL_PROJECTS ? true : $projectFlag;
     }
 
     /** Is external AI available at all under this admin policy? */

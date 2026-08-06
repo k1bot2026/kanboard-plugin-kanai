@@ -15,6 +15,7 @@ class ConfigController extends BaseController
             'openai_key_mask' => $crypto->mask($settings['kanai_openai_key']),
             'anthropic_key_mask' => $crypto->mask($settings['kanai_anthropic_key']),
             'local_key_mask' => $crypto->mask($settings['kanai_local_api_key']),
+            'skills' => $this->settingsModel->getSkills(),
             'title' => t('KanAI Settings'),
         ]));
     }

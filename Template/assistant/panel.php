@@ -73,7 +73,7 @@
         </div>
 
         <div class="kanai-skills">
-            <?php foreach (\Kanboard\Plugin\KanAI\Model\AssistantSkills::all() as $skill): ?>
+            <?php foreach ($skills as $skill): ?>
                 <form method="post" class="kanai-skill-form"
                       action="<?= $this->url->href('AssistantController', 'ask', ['project_id' => $project['id'], 'plugin' => 'KanAI']) ?>">
                     <?= $this->form->csrf() ?>

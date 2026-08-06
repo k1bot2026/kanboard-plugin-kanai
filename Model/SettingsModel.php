@@ -48,6 +48,7 @@ class SettingsModel extends Base
         // fallback), so surface it explicitly — otherwise the admin config select
         // has no stored value to bind to and always renders as "Disabled".
         $out['kanai_external_policy'] = $this->getExternalPolicy();
+        $out['kanai_enable_policy'] = $this->getEnablePolicy();
         $crypto = $this->crypto();
         $out['kanai_openai_key'] = $crypto->decrypt($this->configModel->get('kanai_openai_key', ''));
         $out['kanai_anthropic_key'] = $crypto->decrypt($this->configModel->get('kanai_anthropic_key', ''));
@@ -59,8 +60,10 @@ class SettingsModel extends Base
     {
         $crypto = $this->crypto();
         $policy = \Kanboard\Plugin\KanAI\Settings\GatingPolicy::normalizePolicy($values['kanai_external_policy'] ?? 'disabled');
+        $enablePolicy = \Kanboard\Plugin\KanAI\Settings\GatingPolicy::normalizeEnablePolicy($values['kanai_enable_policy'] ?? 'per_project');
         $save = [
             'kanai_external_policy' => $policy,
+            'kanai_enable_policy' => $enablePolicy,
             // Keep the legacy boolean in sync for any external reader.
             'kanai_external_enabled' => $policy === \Kanboard\Plugin\KanAI\Settings\GatingPolicy::POLICY_DISABLED ? '0' : '1',
             'kanai_default_provider' => in_array($values['kanai_default_provider'] ?? 'local', ['local', 'openai', 'anthropic'], true)
@@ -88,6 +91,13 @@ class SettingsModel extends Base
             }
         }
         $this->configModel->save($save);
+
+        // Quick actions are saved only when the editor was part of the submitted
+        // form (a hidden marker says so), so unrelated saves never wipe them.
+        // With the marker present, an empty list clears back to the defaults.
+        if (! empty($values['kanai_skills_present'])) {
+            $this->saveSkills($values['kanai_skill_label'] ?? [], $values['kanai_skill_instruction'] ?? []);
+        }
     }
 
     /**
@@ -110,7 +120,60 @@ class SettingsModel extends Base
         return \Kanboard\Plugin\KanAI\Settings\GatingPolicy::externalEnabled($this->getExternalPolicy());
     }
 
+    /**
+     * Application-admin enablement policy: per_project (default) | all_projects.
+     * Controls whether KanAI must be turned on per project or is available
+     * instance-wide.
+     */
+    public function getEnablePolicy(): string
+    {
+        return \Kanboard\Plugin\KanAI\Settings\GatingPolicy::normalizeEnablePolicy(
+            $this->configModel->get('kanai_enable_policy', \Kanboard\Plugin\KanAI\Settings\GatingPolicy::ENABLE_PER_PROJECT)
+        );
+    }
+
+    /**
+     * The effective quick actions: the admin-customized set, or the built-in
+     * defaults when none has been saved.
+     * @return array<int,array{key:string,label:string,instruction:string}>
+     */
+    public function getSkills(): array
+    {
+        return \Kanboard\Plugin\KanAI\Settings\QuickActions::decode(
+            $this->configModel->get('kanai_skills', ''),
+            \Kanboard\Plugin\KanAI\Model\AssistantSkills::defaults()
+        );
+    }
+
+    /** Resolve a clicked quick action's key to its instruction (null if unknown). */
+    public function skillInstruction(string $key): ?string
+    {
+        return \Kanboard\Plugin\KanAI\Settings\QuickActions::instructionFor($this->getSkills(), $key);
+    }
+
+    /**
+     * Save the admin-customized quick actions from the parallel label/instruction
+     * arrays the config form submits. An empty set clears the customization,
+     * restoring the built-in defaults.
+     */
+    public function saveSkills(array $labels, array $instructions): void
+    {
+        $rows = \Kanboard\Plugin\KanAI\Settings\QuickActions::fromForm($labels, $instructions);
+        $this->configModel->save(['kanai_skills' => \Kanboard\Plugin\KanAI\Settings\QuickActions::encode($rows)]);
+    }
+
     public function getProjectEnabled(int $projectId): bool
+    {
+        // Under the all-projects policy KanAI is on everywhere; otherwise it
+        // defers to the project manager's per-project opt-in.
+        return \Kanboard\Plugin\KanAI\Settings\GatingPolicy::projectEnabled(
+            $this->getEnablePolicy(),
+            $this->projectMetadataModel->get($projectId, 'kanai_enabled', '0') === '1'
+        );
+    }
+
+    /** The project's own stored opt-in flag, ignoring the admin enablement policy. */
+    public function getProjectEnabledFlag(int $projectId): bool
     {
         return $this->projectMetadataModel->get($projectId, 'kanai_enabled', '0') === '1';
     }

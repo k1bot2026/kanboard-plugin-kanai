@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.9.0 — 2026-08-06
+
+### Added
+- **Enable KanAI for all projects (#3).** A new *Availability* policy in the
+  admin settings lets you turn KanAI on across the whole Kanboard instance
+  instead of enabling it in each project. The default stays **Per project** — a
+  project manager must opt each project in — so larger installs keep the
+  restriction they want; switching to **All projects** makes the assistant
+  available everywhere with no per-project setup. Each project's own on/off flag
+  is preserved, so it takes effect again if you switch back to per-project.
+- **Customizable quick actions (#4).** The one-click preset buttons in the
+  assistant (Project summary, What's next?, …) are now editable in the admin
+  settings: change a label or its instruction, add your own, or remove ones you
+  don't use. This is especially useful for non-English projects — write the
+  instruction in your language (or add "Answer in <language>.") so answers come
+  back in the right language. Remove every row and save to restore the built-in
+  defaults. Instructions are admin-authored trusted text (an admin can already
+  type anything into the ask box), so this adds convenience, not new capability.
+
 ## 1.8.0 — 2026-07-20
 
 ### Fixed
