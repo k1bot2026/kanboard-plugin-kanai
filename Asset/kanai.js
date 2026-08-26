@@ -332,4 +332,29 @@
             );
         }
     });
+
+    // Config page: add/remove rows in the customizable quick-actions editor.
+    document.addEventListener('click', function (e) {
+        if (! e.target.closest) {
+            return;
+        }
+        var add = e.target.closest('#kanai-skill-add');
+        if (add) {
+            e.preventDefault();
+            var rows = document.getElementById('kanai-skill-rows');
+            var tpl = document.getElementById('kanai-skill-template');
+            if (rows && tpl && 'content' in tpl) {
+                rows.appendChild(tpl.content.cloneNode(true));
+                var last = rows.querySelector('.kanai-skill-row:last-child input');
+                if (last) { last.focus(); }
+            }
+            return;
+        }
+        var remove = e.target.closest('.kanai-skill-remove');
+        if (remove) {
+            e.preventDefault();
+            var row = remove.closest('.kanai-skill-row');
+            if (row) { row.parentNode.removeChild(row); }
+        }
+    });
 })();

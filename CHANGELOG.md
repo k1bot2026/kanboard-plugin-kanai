@@ -1,5 +1,47 @@
 # Changelog
 
+## 1.9.0 — 2026-08-06
+
+### Added
+- **Enable KanAI for all projects (#3).** A new *Availability* policy in the
+  admin settings lets you turn KanAI on across the whole Kanboard instance
+  instead of enabling it in each project. The default stays **Per project** — a
+  project manager must opt each project in — so larger installs keep the
+  restriction they want; switching to **All projects** makes the assistant
+  available everywhere with no per-project setup. Each project's own on/off flag
+  is preserved, so it takes effect again if you switch back to per-project.
+- **Customizable quick actions (#4).** The one-click preset buttons in the
+  assistant (Project summary, What's next?, …) are now editable in the admin
+  settings: change a label or its instruction, add your own, or remove ones you
+  don't use. This is especially useful for non-English projects — write the
+  instruction in your language (or add "Answer in <language>.") so answers come
+  back in the right language. Remove every row and save to restore the built-in
+  defaults. Instructions are admin-authored trusted text (an admin can already
+  type anything into the ask box), so this adds convenience, not new capability.
+
+## 1.8.0 — 2026-07-20
+
+### Fixed
+- **External-AI policy reset to “Disabled” (#1).** The admin *External providers*
+  policy was saved correctly but never displayed: `SettingsModel::getGlobal()`
+  built its values only from the defaults map, which has no
+  `kanai_external_policy` entry, so the config dropdown always fell back to its
+  first option (“Disabled”). Re-saving the settings then wrote that back,
+  silently turning external AI off again even after a project had opted in. The
+  resolved policy (with the legacy-boolean fallback) is now included in the form
+  values, so the select reflects what is actually stored.
+
+### Added
+- **API key for the local LLM (#2).** The local (OpenAI-compatible) provider now
+  accepts an optional API key, so KanAI can talk to a local model server that
+  requires authentication — LocalAI, open-webui, or any Ollama/vLLM endpoint
+  reached over the internet through a reverse proxy. The key is stored encrypted
+  (AES-256-GCM, same as the OpenAI/Anthropic keys), shown only as a masked hint,
+  and sent as an `Authorization: Bearer` header. Leave it blank for servers that
+  need no auth (Ollama, llama.cpp) — behaviour is unchanged there. The “Test
+  connection” button for the local server now authenticates with the key too and
+  surfaces an auth error instead of reporting “0 models”.
+
 ## 1.7.1 — 2026-07-03
 
 QA pass over the async feature; all fixes verified live in a real browser.

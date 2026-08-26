@@ -6,6 +6,16 @@
     <?= $this->form->csrf() ?>
 
     <fieldset>
+        <legend>🗂️ <?= t('Availability') ?></legend>
+        <?= $this->form->label(t('Enable KanAI in projects'), 'kanai_enable_policy') ?>
+        <?= $this->form->select('kanai_enable_policy', [
+            'per_project' => t('Per project — a project manager turns it on for each project'),
+            'all_projects' => t('All projects — enabled across the whole Kanboard instance'),
+        ], $values) ?>
+        <p class="form-help"><?= t('“Per project” keeps KanAI off until enabled in each project’s settings (best for larger installs). “All projects” makes it available everywhere without per-project setup.') ?></p>
+    </fieldset>
+
+    <fieldset>
         <legend>🖥️ <?= t('Local LLM (default)') ?></legend>
         <p class="form-help"><?= t('An OpenAI-compatible server such as Ollama, LM Studio or vLLM. All project data stays on your own machine.') ?></p>
 
@@ -18,8 +28,12 @@
         <datalist id="kanai-local-models"></datalist>
         <p class="form-help"><?= t('Tip: press "Test connection" to discover the models available on the server.') ?></p>
 
+        <?= $this->form->label(t('API key (optional)'), 'kanai_local_api_key') ?>
+        <?= $this->form->password('kanai_local_api_key', []) ?>
+        <p class="form-help"><?= $local_key_mask !== '' ? t('Saved: %s (leave blank to keep)', $local_key_mask) : t('Leave blank for a server that needs no authentication (Ollama, llama.cpp). Set a key for a server that requires one, e.g. LocalAI, or a proxy in front of it.') ?></p>
+
         <p>
-            <button type="button" class="btn kanai-test-btn" data-provider="local"><?= t('Test connection') ?></button>
+            <button type="button" class="btn kanai-test-btn" data-provider="local" data-key-field="kanai_local_api_key"><?= t('Test connection') ?></button>
             <span class="kanai-test-result" id="kanai-test-result-local"></span>
         </p>
     </fieldset>
@@ -67,6 +81,39 @@
             <button type="button" class="btn kanai-test-btn" data-provider="anthropic" data-key-field="kanai_anthropic_key"><?= t('Test connection') ?></button>
             <span class="kanai-test-result" id="kanai-test-result-anthropic"></span>
         </p>
+    </fieldset>
+
+    <fieldset class="kanai-skills-editor">
+        <legend>⚡ <?= t('Quick actions') ?></legend>
+        <p class="form-help"><?= t('The one-click preset buttons shown in the assistant. Edit the label and the instruction sent to the model. Tip: for non-English projects, write the instruction in your language or add “Answer in <language>.” Remove every row and save to restore the built-in defaults.') ?></p>
+
+        <input type="hidden" name="kanai_skills_present" value="1">
+        <div class="kanai-skill-rows" id="kanai-skill-rows">
+            <?php foreach ($skills as $skill): ?>
+                <div class="kanai-skill-row">
+                    <div class="kanai-skill-row-fields">
+                        <input type="text" name="kanai_skill_label[]" value="<?= $this->text->e($skill['label']) ?>"
+                               placeholder="<?= t('Label (e.g. 📋 Project summary)') ?>" maxlength="80">
+                        <textarea name="kanai_skill_instruction[]" rows="2"
+                                  placeholder="<?= t('Instruction sent to the model') ?>"><?= $this->text->e($skill['instruction']) ?></textarea>
+                    </div>
+                    <button type="button" class="btn kanai-skill-remove" title="<?= t('Remove') ?>">&times;</button>
+                </div>
+            <?php endforeach ?>
+        </div>
+        <p><button type="button" class="btn" id="kanai-skill-add"><i class="fa fa-plus"></i> <?= t('Add quick action') ?></button></p>
+
+        <template id="kanai-skill-template">
+            <div class="kanai-skill-row">
+                <div class="kanai-skill-row-fields">
+                    <input type="text" name="kanai_skill_label[]" value=""
+                           placeholder="<?= t('Label (e.g. 📋 Project summary)') ?>" maxlength="80">
+                    <textarea name="kanai_skill_instruction[]" rows="2"
+                              placeholder="<?= t('Instruction sent to the model') ?>"></textarea>
+                </div>
+                <button type="button" class="btn kanai-skill-remove" title="<?= t('Remove') ?>">&times;</button>
+            </div>
+        </template>
     </fieldset>
 
     <fieldset>

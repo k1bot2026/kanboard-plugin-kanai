@@ -195,6 +195,14 @@
 .kanai-config fieldset { margin-bottom: 22px; }
 .kanai-config h4 { margin: 14px 0 8px; }
 
+/* Customizable quick-actions editor (config page). */
+.kanai-skill-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 10px; }
+.kanai-skill-row-fields { flex: 1 1 auto; }
+.kanai-skill-row-fields input,
+.kanai-skill-row-fields textarea { width: 100%; margin: 0 0 4px; }
+.kanai-skill-row-fields textarea { resize: vertical; }
+.kanai-skill-remove { flex: 0 0 auto; line-height: 1; font-size: 18px; padding: 4px 10px; }
+
 @media (max-width: 768px) {
     .kanai-layout { flex-direction: column; }
     .kanai-convlist { flex: 1 1 auto; width: 100%; }

@@ -81,4 +81,22 @@ final class GatingPolicyTest extends TestCase
         $this->expectException(\RuntimeException::class);
         GatingPolicy::resolveProvider(true, 'openai', true, false);
     }
+
+    public function testNormalizeEnablePolicyDefaultsToPerProject(): void
+    {
+        $this->assertSame('per_project', GatingPolicy::normalizeEnablePolicy('nonsense'));
+        $this->assertSame('per_project', GatingPolicy::normalizeEnablePolicy(''));
+        $this->assertSame('per_project', GatingPolicy::normalizeEnablePolicy('per_project'));
+        $this->assertSame('all_projects', GatingPolicy::normalizeEnablePolicy('all_projects'));
+    }
+
+    public function testProjectEnabledAppliesEnablePolicy(): void
+    {
+        // per_project: defers to the project flag
+        $this->assertTrue(GatingPolicy::projectEnabled('per_project', true));
+        $this->assertFalse(GatingPolicy::projectEnabled('per_project', false));
+        // all_projects: on everywhere, even when the project flag is off
+        $this->assertTrue(GatingPolicy::projectEnabled('all_projects', false));
+        $this->assertTrue(GatingPolicy::projectEnabled('all_projects', true));
+    }
 }

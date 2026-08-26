@@ -41,6 +41,7 @@ class AssistantController extends BaseController
             'last_message_id' => $activeId > 0 ? $this->conversationModel->getLastMessageId($activeId) : 0,
             'messages' => $activeId > 0 ? $this->conversationModel->getMessages($activeId, 200) : [],
             'proposals' => $activeId > 0 ? $this->conversationModel->getPendingProposals($activeId) : [],
+            'skills' => $this->settingsModel->getSkills(),
             'title' => t('KanAI Assistant'),
         ]));
     }
@@ -57,7 +58,7 @@ class AssistantController extends BaseController
 
         $skill = isset($values['skill']) ? $values['skill'] : '';
         if ($skill !== '') {
-            $instruction = \Kanboard\Plugin\KanAI\Model\AssistantSkills::instructionFor($skill);
+            $instruction = $this->settingsModel->skillInstruction($skill);
             if ($instruction !== null) {
                 $question = $instruction;
             }

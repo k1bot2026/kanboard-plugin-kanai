@@ -125,7 +125,9 @@ server — discovers the available models as suggestions for the model field.
 
 | Setting | Default | |
 |---|---|---|
+| Availability | per project | `per_project` (managers enable it individually) / `all_projects` (enabled instance-wide) |
 | Base URL | `http://localhost:11434/v1` | any OpenAI-compatible server; use `http://host.docker.internal:11434/v1` from Docker |
+| API key (local) | _(blank)_ | optional; set it for a local server that needs auth (LocalAI, a reverse proxy). Blank = no auth (Ollama, llama.cpp) |
 | External AI policy | disabled | `disabled` / `project_optin` / `all_projects` — app-admin only |
 | Max context tokens | 8000 | how much project data goes into a question |
 | Max output tokens | 1024 | answer length budget |
@@ -134,15 +136,23 @@ server — discovers the available models as suggestions for the model field.
 | History retention | forever | auto-purge idle conversations after N days |
 | Background processing | on | answers computed by a detached worker; browser polls |
 | PHP CLI binary | `php` | full path if `php` is not on the web server's PATH |
+| Quick actions | built-in set | edit the label/instruction of the assistant's preset buttons, add your own, or remove them; clear all to restore defaults |
+
+**Quick actions.** The one-click preset buttons in the assistant are editable
+in the admin settings — handy for non-English projects: write the instruction
+in your language (or append "Answer in \<language>.") so answers come back in
+the right language.
 
 ### Per project (project sidebar → KanAI Settings, managers)
 
 ![Project settings](screenshots/project-settings.png)
 
-KanAI is off per project until enabled here. Whether the "allow external AI"
-checkbox appears at all is governed by the application admin's external policy
-(project managers cannot enable external AI the admin has locked down). The
-automatic daily digest is a separate opt-in.
+KanAI is off per project until enabled here — unless the admin has set
+*Availability* to **All projects**, in which case it is on everywhere and this
+toggle is replaced by a note. Whether the "allow external AI" checkbox appears
+at all is governed by the application admin's external policy (project managers
+cannot enable external AI the admin has locked down). The automatic daily
+digest is a separate opt-in.
 
 ### Deployment note: background worker
 

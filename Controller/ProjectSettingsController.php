@@ -11,10 +11,13 @@ class ProjectSettingsController extends BaseController
         $project = $this->getProject();
         $this->response->html($this->helper->layout->project('KanAI:project/settings', [
             'project' => $project,
-            'enabled' => $this->settingsModel->getProjectEnabled($project['id']),
+            // The checkbox binds to the project's own stored flag; the effective
+            // state under the all-projects policy is shown as a note instead.
+            'enabled' => $this->settingsModel->getProjectEnabledFlag($project['id']),
             'external_opt_in' => $this->settingsModel->getProjectExternalOptIn($project['id']),
             'auto_digest' => $this->settingsModel->getProjectAutoDigest($project['id']),
             'external_policy' => $this->settingsModel->getExternalPolicy(),
+            'enable_policy' => $this->settingsModel->getEnablePolicy(),
             'title' => t('KanAI Settings'),
         ]));
     }

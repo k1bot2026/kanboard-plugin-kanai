@@ -9,6 +9,15 @@ namespace Kanboard\Plugin\KanAI\Model;
  */
 class AssistantSkills
 {
+    /**
+     * The built-in quick actions, used when the admin has not customized them.
+     * @return array<int,array{key:string,label:string,instruction:string}>
+     */
+    public static function defaults(): array
+    {
+        return self::all();
+    }
+
     /** @return array<int,array{key:string,label:string,instruction:string}> */
     public static function all(): array
     {

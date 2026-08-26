@@ -33,7 +33,7 @@ class LlmClientFactory extends Base
                 return new OpenAiCompatibleClient($http, 'https://api.openai.com/v1', $settings['kanai_openai_key'], $settings['kanai_openai_model']);
             case 'local':
             default:
-                return new OpenAiCompatibleClient($http, $settings['kanai_local_base_url'], '', $settings['kanai_local_model']);
+                return new OpenAiCompatibleClient($http, $settings['kanai_local_base_url'], $settings['kanai_local_api_key'] ?? '', $settings['kanai_local_model']);
         }
     }
 

@@ -53,4 +53,32 @@ final class OpenAiCompatibleClientTest extends TestCase
         $this->assertSame('http://local/v1/chat/completions', $captured['url']);
         $this->assertContains('Authorization: Bearer KEY', $captured['headers']);
     }
+
+    public function testCompleteOmitsAuthHeaderWhenKeyEmpty(): void
+    {
+        $captured = [];
+        $http = function (string $url, array $body, array $headers) use (&$captured) {
+            $captured = compact('headers');
+            return ['choices' => [['message' => ['content' => 'answer']]]];
+        };
+        $client = new OpenAiCompatibleClient($http, 'http://local/v1', '', 'm');
+        $client->complete('SYS', [['role' => 'user', 'content' => 'q']]);
+        foreach ($captured['headers'] as $h) {
+            $this->assertStringStartsNotWith('Authorization:', $h);
+        }
+    }
+
+    public function testCompleteSendsAuthHeaderForLocalKey(): void
+    {
+        $captured = [];
+        $http = function (string $url, array $body, array $headers) use (&$captured) {
+            $captured = compact('headers');
+            return ['choices' => [['message' => ['content' => 'ok']]]];
+        };
+        // A local server behind auth (LocalAI, a reverse proxy) — same wire shape,
+        // real key. The bearer token must be sent.
+        $client = new OpenAiCompatibleClient($http, 'https://ai.example.com/v1', 'local-secret', 'm');
+        $client->complete('SYS', [['role' => 'user', 'content' => 'q']]);
+        $this->assertContains('Authorization: Bearer local-secret', $captured['headers']);
+    }
 }
